@@ -1,0 +1,26 @@
+.layout-wrapper {
+    min-height: 100vh;
+}
+
+.layout-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    background-color: var(--surface-card);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    // Override PrimeNG menubar border/radius to look seamlessly full-width
+    ::ng-deep .p-menubar {
+        border: none;
+        border-radius: 0;
+    }
+}
+
+.layout-content {
+    padding-top: 5rem; // Space for the fixed navbar
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 2rem;
+}
