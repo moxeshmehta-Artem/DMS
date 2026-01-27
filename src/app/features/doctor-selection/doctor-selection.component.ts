@@ -108,7 +108,7 @@ export class DoctorSelectionComponent implements OnInit {
       const currentUser = this.authService.currentUser();
       if (!currentUser) return;
 
-      this.appointmentService.bookAppointment({
+      const success = this.appointmentService.bookAppointment({
         patientId: currentUser.id,
         patientName: (currentUser.firstName || '') + ' ' + (currentUser.lastName || ''),
         dietitianId: this.selectedDietitian.id,
@@ -118,8 +118,12 @@ export class DoctorSelectionComponent implements OnInit {
         description: this.description || 'Consultation'
       });
 
-      this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Appointment Request Sent!' });
-      this.displayBookingDialog = false;
+      if (success) {
+        this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Appointment Request Sent!' });
+        this.displayBookingDialog = false;
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Slot Unavailable', detail: 'This time slot is already booked. Please choose another.' });
+      }
     }
   }
 }

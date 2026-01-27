@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
+import { DietPlan } from '../models/diet-plan.model';
 
 @Injectable({
     providedIn: 'root'
 })
 export class PatientService {
-    // Map of Patient ID -> Note String
-    private patientNotes = new Map<number, string>();
+    // Map of Patient ID -> DietPlan
+    private patientNotes = new Map<number, DietPlan>();
 
-    saveNote(patientId: number, note: string): void {
-        this.patientNotes.set(patientId, note);
+    saveDietPlan(patientId: number, plan: DietPlan): void {
+        this.patientNotes.set(patientId, plan);
     }
 
-    getNote(patientId: number): string {
-        return this.patientNotes.get(patientId) || '';
+    getDietPlan(patientId: number): DietPlan | undefined {
+        return this.patientNotes.get(patientId);
     }
 }

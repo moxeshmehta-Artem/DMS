@@ -85,7 +85,44 @@ import { TagModule } from 'primeng/tag';
             </p-table>
         </div>
 
-        <div class="surface-card p-4 shadow-2 border-round mt-4" *ngIf="!isFrontdesk">
+        <!-- PATIENT SPECIFIC: My Appointments -->
+        <div class="surface-card p-4 shadow-2 border-round mt-4" *ngIf="isPatient">
+            <div class="text-2xl font-medium text-900 mb-3">My Appointments</div>
+            <p-table [value]="myAppointments" [tableStyle]="{'min-width': '50rem'}">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Dietitian</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-appt>
+                    <tr>
+                        <td>{{ appt.date | date:'mediumDate' }}</td>
+                        <td>{{ appt.timeSlot }}</td>
+                        <td>{{ appt.dietitianName }}</td>
+                        <td>{{ appt.description }}</td>
+                        <td>
+                            <p-tag [value]="appt.status" [severity]="getSeverity(appt.status)"></p-tag>
+                        </td>
+                        <td>
+                            <span *ngIf="appt.notes">{{ appt.notes }}</span>
+                            <span *ngIf="!appt.notes" class="text-500 font-italic">-</span>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="6" class="text-center p-4">You have no scheduled appointments.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <div class="surface-card p-4 shadow-2 border-round mt-4" *ngIf="!isFrontdesk && !isPatient">
             <div class="text-2xl font-medium text-900 mb-3">Welcome to your Dashboard</div>
             <p class="text-600 line-height-3 mb-4">
                 You are logged in as <strong>{{ currentUser()?.username }}</strong>. 
@@ -93,7 +130,7 @@ import { TagModule } from 'primeng/tag';
             </p>
             
             <div class="flex flex-wrap gap-2" *ngIf="userPermissions; else noPermissions">
-                <p-chip *ngIf="userPermissions.includes('register_patient')" label="Register Patient" icon="pi pi-check"></p-chip>
+                <p-chip *ngIf="userPermissions.includes('register_patient')" label="" icon="pi pi-check"></p-chip>
                 <p-chip *ngIf="userPermissions.includes('manage_dietitians')" label="Manage Dietitians" icon="pi pi-check"></p-chip>
                 <p-chip *ngIf="userPermissions.includes('manage_doctors')" label="Add Doctor" icon="pi pi-check"></p-chip>
                 <p-chip *ngIf="userPermissions.includes('view_patients')" label="View Patients" icon="pi pi-check"></p-chip>
@@ -115,7 +152,9 @@ export class DashboardComponent implements OnInit {
     menuItems: any[] = [];
 
     patientOverview: any[] = [];
+    myAppointments: any[] = []; // for patients
     isFrontdesk = false;
+    isPatient = false;
 
     private appointmentService = inject(AppointmentService);
 
@@ -130,10 +169,20 @@ export class DashboardComponent implements OnInit {
         if (role) {
             this.menuItems = MENU_ITEMS[role] || [];
             this.isFrontdesk = role === Role.Frontdesk;
+            this.isPatient = role === Role.Patient;
 
             if (this.isFrontdesk) {
                 this.loadPatientOverview();
+            } else if (this.isPatient) {
+                this.loadMyAppointments();
             }
+        }
+    }
+
+    loadMyAppointments() {
+        const user = this.currentUser();
+        if (user) {
+            this.myAppointments = this.appointmentService.getAppointmentsForPatient(user.id);
         }
     }
 
@@ -154,11 +203,12 @@ export class DashboardComponent implements OnInit {
         });
     }
 
-    getSeverity(status: string): 'success' | 'warning' | 'danger' | undefined {
+    getSeverity(status: string): 'success' | 'warning' | 'danger' | 'info' | undefined {
         switch (status) {
             case 'Confirmed': return 'success';
             case 'Pending': return 'warning';
             case 'Rejected': return 'danger';
+            case 'Completed': return 'info';
             default: return undefined;
         }
     }

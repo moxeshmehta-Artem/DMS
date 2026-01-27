@@ -71,14 +71,31 @@ import { MessageService } from 'primeng/api'; // Added
         </p-card>
 
         <!-- NOTE DIALOG -->
-        <p-dialog [(visible)]="displayNoteDialog" [header]="'Notes for ' + selectedPatient?.name" [modal]="true" [style]="{width: '500px'}">
-            <div class="flex flex-column gap-2 pt-2">
-                <label class="font-bold">Dietitian Notes</label>
-                <textarea pInputTextarea [(ngModel)]="currentNote" rows="5" placeholder="Enter clinical notes, diet adjustments, etc..."></textarea>
+        <p-dialog [(visible)]="displayNoteDialog" [header]="'Diet Plan for ' + selectedPatient?.name" [modal]="true" [style]="{width: '600px'}">
+            <div class="flex flex-column gap-3 pt-2">
+                <label class="font-bold">Edit Diet Plan</label>
+                <div class="grid p-fluid">
+                    <div class="col-12 md:col-6">
+                        <label class="block mb-2 font-bold">Breakfast</label>
+                        <textarea pInputTextarea [(ngModel)]="newPlan.breakfast" rows="3"></textarea>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <label class="block mb-2 font-bold">Lunch</label>
+                        <textarea pInputTextarea [(ngModel)]="newPlan.lunch" rows="3"></textarea>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <label class="block mb-2 font-bold">Dinner</label>
+                        <textarea pInputTextarea [(ngModel)]="newPlan.dinner" rows="3"></textarea>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <label class="block mb-2 font-bold">Snacks</label>
+                        <textarea pInputTextarea [(ngModel)]="newPlan.snacks" rows="3"></textarea>
+                    </div>
+                </div>
             </div>
             <ng-template pTemplate="footer">
                 <p-button label="Cancel" icon="pi pi-times" styleClass="p-button-text" (onClick)="displayNoteDialog = false"></p-button>
-                <p-button label="Save Note" icon="pi pi-check" (onClick)="saveNote()"></p-button>
+                <p-button label="Save Plan" icon="pi pi-check" (onClick)="saveDietPlan()"></p-button>
             </ng-template>
         </p-dialog>
     </div>
@@ -90,7 +107,7 @@ export class PatientListComponent implements OnInit {
   // Dialog State
   displayNoteDialog = false;
   selectedPatient: any = null;
-  currentNote = '';
+  newPlan = { breakfast: '', lunch: '', dinner: '', snacks: '' };
 
   private appointmentService = inject(AppointmentService);
   private authService = inject(AuthService);
@@ -132,14 +149,19 @@ export class PatientListComponent implements OnInit {
 
   addNote(patient: any) {
     this.selectedPatient = patient;
-    this.currentNote = this.patientService.getNote(patient.id);
+    const existingPlan = this.patientService.getDietPlan(patient.id);
+    if (existingPlan) {
+      this.newPlan = { ...existingPlan };
+    } else {
+      this.newPlan = { breakfast: '', lunch: '', dinner: '', snacks: '' };
+    }
     this.displayNoteDialog = true;
   }
 
-  saveNote() {
+  saveDietPlan() {
     if (this.selectedPatient) {
-      this.patientService.saveNote(this.selectedPatient.id, this.currentNote);
-      this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Patient note updated.' });
+      this.patientService.saveDietPlan(this.selectedPatient.id, this.newPlan);
+      this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Diet plan updated.' });
       this.displayNoteDialog = false;
     }
   }

@@ -72,11 +72,13 @@ import { DividerModule } from 'primeng/divider';
                     <div class="col-12 md:col-6">
                         <label class="block mb-2 font-bold">Phone</label>
                         <input pInputText formControlName="phone" placeholder="+1 234 567 890" />
+                        <small class="text-red-500" *ngIf="isInvalid('phone')">Phone must be 10-15 digits</small>
                     </div>
                     
                     <div class="col-12">
                         <label class="block mb-2 font-bold">Address</label>
                         <textarea pInputTextarea formControlName="address" rows="2" placeholder="Street Address"></textarea>
+                        <small class="text-red-500" *ngIf="isInvalid('address')">Address is required</small>
                     </div>
                 </div>
 
@@ -105,26 +107,32 @@ import { DividerModule } from 'primeng/divider';
                     <div class="col-6 md:col-3">
                         <label class="block mb-2 font-bold">Height (cm)</label>
                         <p-inputNumber formControlName="height" suffix=" cm" [min]="0"></p-inputNumber>
+                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.height')?.invalid && regForm.get('vitals.height')?.touched">Range: 0-300</small>
                     </div>
                     <div class="col-6 md:col-3">
                         <label class="block mb-2 font-bold">Weight (kg)</label>
                         <p-inputNumber formControlName="weight" suffix=" kg" [min]="0" [maxFractionDigits]="1"></p-inputNumber>
+                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.weight')?.invalid && regForm.get('vitals.weight')?.touched">Range: 0-500</small>
                     </div>
                     <div class="col-6 md:col-3">
                         <label class="block mb-2 font-bold">BP (Systolic)</label>
                         <p-inputNumber formControlName="bloodPressureSys" suffix=" mmHg" [min]="0"></p-inputNumber>
+                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.bloodPressureSys')?.invalid && regForm.get('vitals.bloodPressureSys')?.touched">Range: 0-300</small>
                     </div>
                     <div class="col-6 md:col-3">
                         <label class="block mb-2 font-bold">BP (Diastolic)</label>
                         <p-inputNumber formControlName="bloodPressureDia" suffix=" mmHg" [min]="0"></p-inputNumber>
+                         <small class="text-red-500 block" *ngIf="regForm.get('vitals.bloodPressureDia')?.invalid && regForm.get('vitals.bloodPressureDia')?.touched">Range: 0-300</small>
                     </div>
                     <div class="col-6 md:col-3">
                         <label class="block mb-2 font-bold">Heart Rate</label>
                         <p-inputNumber formControlName="heartRate" suffix=" bpm" [min]="0"></p-inputNumber>
+                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.heartRate')?.invalid && regForm.get('vitals.heartRate')?.touched">Range: 0-300</small>
                     </div>
                     <div class="col-6 md:col-3">
                         <label class="block mb-2 font-bold">Body Temp (°C)</label>
                         <p-inputNumber formControlName="temperature" suffix=" °C" [min]="0" [maxFractionDigits]="1"></p-inputNumber>
+                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.temperature')?.invalid && regForm.get('vitals.temperature')?.touched">Range: 30-45</small>
                     </div>
                 </div>
 
@@ -151,17 +159,17 @@ export class RegistrationComponent {
     dob: [null],
     gender: [''],
     email: ['', [Validators.email]],
-    phone: [''],
-    address: [''],
+    phone: ['', [Validators.pattern('^[0-9]{10,15}$')]],
+    address: ['', Validators.required],
     username: ['', Validators.required],
     password: ['', Validators.required],
     vitals: this.fb.group({
-      height: [null],
-      weight: [null],
-      bloodPressureSys: [null],
-      bloodPressureDia: [null],
-      heartRate: [null],
-      temperature: [null]
+      height: [null, [Validators.min(0), Validators.max(300)]],
+      weight: [null, [Validators.min(0), Validators.max(500)]],
+      bloodPressureSys: [null, [Validators.min(0), Validators.max(300)]],
+      bloodPressureDia: [null, [Validators.min(0), Validators.max(300)]],
+      heartRate: [null, [Validators.min(0), Validators.max(300)]],
+      temperature: [null, [Validators.min(30), Validators.max(45)]]
     })
   });
 

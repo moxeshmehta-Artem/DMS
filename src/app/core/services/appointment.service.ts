@@ -52,7 +52,20 @@ export class AppointmentService {
         return this.MOCK_APPOINTMENTS.filter(a => a.dietitianId === dietitianId);
     }
 
+    isSlotAvailable(dietitianId: number, date: Date, timeSlot: string): boolean {
+        return !this.MOCK_APPOINTMENTS.some(a =>
+            a.dietitianId === dietitianId &&
+            new Date(a.date).toDateString() === new Date(date).toDateString() &&
+            a.timeSlot === timeSlot &&
+            (a.status === 'Pending' || a.status === 'Confirmed')
+        );
+    }
+
     bookAppointment(appt: Omit<Appointment, 'id' | 'status'>): boolean {
+        if (!this.isSlotAvailable(appt.dietitianId, appt.date, appt.timeSlot)) {
+            return false;
+        }
+
         const newAppt: Appointment = {
             ...appt,
             id: this.MOCK_APPOINTMENTS.length + 1,
@@ -62,7 +75,7 @@ export class AppointmentService {
         return true;
     }
 
-    updateStatus(id: number, status: 'Confirmed' | 'Rejected'): void {
+    updateStatus(id: number, status: 'Confirmed' | 'Rejected' | 'Completed'): void {
         const appt = this.MOCK_APPOINTMENTS.find(a => a.id === id);
         if (appt) {
             appt.status = status;

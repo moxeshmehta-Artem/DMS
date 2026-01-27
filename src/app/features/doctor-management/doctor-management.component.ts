@@ -48,10 +48,12 @@ import { InputNumberModule } from 'primeng/inputnumber';
                     <div class="field col">
                         <label class="block font-bold mb-2">Qualification</label>
                         <input pInputText formControlName="qualification" placeholder="MBBS, MD" class="w-full" />
+                        <small *ngIf="isInvalid('qualification')" class="text-red-500">Qualification is required</small>
                     </div>
                     <div class="field col">
                         <label class="block font-bold mb-2">Experience (Years)</label>
                         <p-inputNumber formControlName="experience" [min]="0" suffix=" Years" styleClass="w-full"></p-inputNumber>
+                        <small *ngIf="isInvalid('experience')" class="text-red-500">Experience must be non-negative</small>
                     </div>
                 </div>
 
@@ -82,8 +84,8 @@ export class DoctorManagementComponent {
   doctorForm: FormGroup = this.fb.group({
     name: ['', Validators.required],
     speciality: ['', Validators.required],
-    qualification: [''],
-    experience: [null]
+    qualification: ['', Validators.required],
+    experience: [null, [Validators.min(0)]]
   });
 
   isInvalid(controlName: string): boolean {

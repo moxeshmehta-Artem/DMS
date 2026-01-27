@@ -7,6 +7,6 @@ export interface Appointment {
     description: string;
     date: Date;
     timeSlot: string; // e.g. "10:00 AM"
-    status: 'Pending' | 'Confirmed' | 'Rejected';
+    status: 'Pending' | 'Confirmed' | 'Rejected' | 'Completed';
     notes?: string;
 }
