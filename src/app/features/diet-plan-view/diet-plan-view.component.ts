@@ -9,7 +9,7 @@ import jsPDF from 'jspdf';
 @Component({
   selector: 'app-diet-plan-view',
   standalone: true,
-  imports: [CommonModule, CardModule, ButtonDirective, Button],
+  imports: [CommonModule, CardModule, Button],
   template: `
     <div class="p-4">
         <p-card header="My Assigned Diet Plan" subheader="Follow these instructions from your Dietitian">
