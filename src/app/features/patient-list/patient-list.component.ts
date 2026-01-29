@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Added for ngModel
 import { AppointmentService } from '../../core/services/appointment.service';
@@ -13,7 +13,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { DialogModule } from 'primeng/dialog'; // Added
 import { InputTextareaModule } from 'primeng/inputtextarea'; // Added
 import { ToastModule } from 'primeng/toast'; // Added
-import { MessageService } from 'primeng/api'; // Added
+import { MessageService, MenuItem } from 'primeng/api'; // Added
+import { MenuModule } from 'primeng/menu';
 
 @Component({
   selector: 'app-patient-list',
@@ -28,7 +29,8 @@ import { MessageService } from 'primeng/api'; // Added
     DatePipe,
     DialogModule,
     InputTextareaModule,
-    ToastModule
+    ToastModule,
+    MenuModule
   ],
   providers: [MessageService],
   template: `
@@ -55,7 +57,7 @@ import { MessageService } from 'primeng/api'; // Added
                         <td>{{ patient.lastVisit | date:'mediumDate' }}</td>
                         <td>{{ patient.totalAppts }}</td>
                         <td>
-                            <p-button icon="pi pi-pencil" [rounded]="false" [text]="true" pTooltip="Add Note" (onClick)="addNote(patient)"></p-button>
+                            <p-button icon="pi pi-ellipsis-v" [rounded]="true" [text]="true" (onClick)="showMenu($event, patient)"></p-button>
                         </td>
                     </tr>
                 </ng-template>
@@ -70,32 +72,38 @@ import { MessageService } from 'primeng/api'; // Added
 
         </p-card>
 
-        <!-- NOTE DIALOG -->
-        <p-dialog [(visible)]="displayNoteDialog" [header]="'Diet Plan for ' + selectedPatient?.name" [modal]="true" [style]="{width: '600px'}">
-            <div class="flex flex-column gap-3 pt-2">
-                <label class="font-bold">Edit Diet Plan</label>
-                <div class="grid p-fluid">
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Breakfast</label>
-                        <textarea pInputTextarea [(ngModel)]="newPlan.breakfast" rows="3"></textarea>
+        <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
+
+        <!-- PATIENT DETAILS DIALOG -->
+        <p-dialog [(visible)]="displayPatientDialog" [header]="selectedPatient?.name" [modal]="true" [style]="{width: '400px'}">
+            <div class="flex flex-column gap-3" *ngIf="selectedPatientDetails">
+                <div class="grid">
+                    <div class="col-6 font-bold">Age:</div>
+                    <div class="col-6">{{ selectedPatientDetails.dob | date:'mediumDate' }}</div>
+                    
+                    <div class="col-6 font-bold">Gender:</div>
+                    <div class="col-6">{{ selectedPatientDetails.gender }}</div>
+                    
+                    <div class="col-12"><hr class="opacity-50"></div>
+                    <div class="col-12 text-primary font-bold">Vitals</div>
+
+                    <div class="col-6 font-bold">Height:</div>
+                    <div class="col-6">{{ selectedPatientDetails.vitals?.height || '-' }} cm</div>
+
+                    <div class="col-6 font-bold">Weight:</div>
+                    <div class="col-6">{{ selectedPatientDetails.vitals?.weight || '-' }} kg</div>
+                    
+                    <div class="col-6 font-bold">Blood Pressure:</div>
+                    <div class="col-6">
+                        {{ selectedPatientDetails.vitals?.bloodPressureSys || '-' }}/{{ selectedPatientDetails.vitals?.bloodPressureDia || '-' }}
                     </div>
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Lunch</label>
-                        <textarea pInputTextarea [(ngModel)]="newPlan.lunch" rows="3"></textarea>
-                    </div>
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Dinner</label>
-                        <textarea pInputTextarea [(ngModel)]="newPlan.dinner" rows="3"></textarea>
-                    </div>
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Snacks</label>
-                        <textarea pInputTextarea [(ngModel)]="newPlan.snacks" rows="3"></textarea>
-                    </div>
+
+                    <div class="col-6 font-bold">Heart Rate:</div>
+                    <div class="col-6">{{ selectedPatientDetails.vitals?.heartRate || '-' }} bpm</div>
                 </div>
             </div>
             <ng-template pTemplate="footer">
-                <p-button label="Cancel" icon="pi pi-times" styleClass="p-button-text" (onClick)="displayNoteDialog = false"></p-button>
-                <p-button label="Save Plan" icon="pi pi-check" (onClick)="saveDietPlan()"></p-button>
+                <p-button label="Close" icon="pi pi-times" (onClick)="displayPatientDialog = false"></p-button>
             </ng-template>
         </p-dialog>
     </div>
@@ -105,9 +113,11 @@ export class PatientListComponent implements OnInit {
   patients: any[] = [];
 
   // Dialog State
-  displayNoteDialog = false;
+  displayPatientDialog = false;
   selectedPatient: any = null;
-  newPlan = { breakfast: '', lunch: '', dinner: '', snacks: '' };
+  selectedPatientDetails: any = null;
+
+  menuItems: MenuItem[] | undefined;
 
   private appointmentService = inject(AppointmentService);
   private authService = inject(AuthService);
@@ -132,6 +142,8 @@ export class PatientListComponent implements OnInit {
           id: appt.patientId,
           name: appt.patientName,
           lastVisit: appt.date,
+          status: appt.status,
+          latestApptId: appt.id,
           totalAppts: 0
         });
       }
@@ -141,28 +153,59 @@ export class PatientListComponent implements OnInit {
 
       if (new Date(appt.date) > new Date(existing.lastVisit)) {
         existing.lastVisit = appt.date;
+        existing.status = appt.status;
+        existing.latestApptId = appt.id;
       }
     });
 
     this.patients = Array.from(uniquePatientsMap.values());
   }
 
-  addNote(patient: any) {
+  @ViewChild('menu') menu!: any; // Access the menu component
+
+  showMenu(event: any, patient: any) {
     this.selectedPatient = patient;
-    const existingPlan = this.patientService.getDietPlan(patient.id);
-    if (existingPlan) {
-      this.newPlan = { ...existingPlan };
-    } else {
-      this.newPlan = { breakfast: '', lunch: '', dinner: '', snacks: '' };
-    }
-    this.displayNoteDialog = true;
+    this.menuItems = [
+      {
+        label: 'Actions',
+        items: [
+          {
+            label: 'View Patient Details',
+            icon: 'pi pi-eye',
+            command: () => this.viewPatientDetails(patient)
+          },
+          {
+            label: 'Mark Consultation Complete',
+            icon: 'pi pi-check-circle',
+            visible: patient.status === 'Confirmed',
+            command: () => this.completeConsultation(patient)
+          },
+          {
+            label: 'Status: ' + patient.status,
+            icon: 'pi pi-info-circle',
+            disabled: true
+          }
+        ]
+      }
+    ];
+    this.menu.toggle(event);
   }
 
-  saveDietPlan() {
-    if (this.selectedPatient) {
-      this.patientService.saveDietPlan(this.selectedPatient.id, this.newPlan);
-      this.messageService.add({ severity: 'success', summary: 'Saved', detail: 'Diet plan updated.' });
-      this.displayNoteDialog = false;
+  viewPatientDetails(patient: any) {
+    const user = this.authService.getAllUsers().find(u => u.id === patient.id);
+    if (user) {
+      this.selectedPatientDetails = user;
+      this.displayPatientDialog = true;
     }
   }
+
+  completeConsultation(patient: any) {
+    if (patient.latestApptId) {
+      this.appointmentService.updateStatus(patient.latestApptId, 'Completed');
+      // Update local state
+      patient.status = 'Completed';
+      this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Consultation marked as complete' });
+    }
+  }
+
 }

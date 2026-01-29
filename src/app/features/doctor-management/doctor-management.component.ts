@@ -11,6 +11,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { PasswordModule } from 'primeng/password'; // Added
 
 @Component({
   selector: 'app-doctor-management',
@@ -23,7 +24,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
     InputTextModule,
     ToastModule,
     DropdownModule,
-    InputNumberModule
+    InputNumberModule,
+    PasswordModule // Added
   ],
   providers: [MessageService],
   template: `
@@ -36,6 +38,18 @@ import { InputNumberModule } from 'primeng/inputnumber';
                     <label class="block font-bold mb-2">Doctor Name</label>
                     <input pInputText formControlName="name" placeholder="Dr. Jane Doe" class="w-full" />
                     <small *ngIf="isInvalid('name')" class="text-red-500">Name is required</small>
+                </div>
+
+                <div class="field">
+                    <label class="block font-bold mb-2">Username</label>
+                    <input pInputText formControlName="username" placeholder="jdoe" class="w-full" />
+                    <small *ngIf="isInvalid('username')" class="text-red-500">Username is required</small>
+                </div>
+
+                <div class="field">
+                    <label class="block font-bold mb-2">Password</label>
+                    <p-password formControlName="password" [feedback]="false" styleClass="w-full" [inputStyle]="{'width':'100%'}"></p-password>
+                    <small *ngIf="isInvalid('password')" class="text-red-500">Password is required</small>
                 </div>
 
                 <div class="field">
@@ -53,7 +67,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
                     <div class="field col">
                         <label class="block font-bold mb-2">Experience (Years)</label>
                         <p-inputNumber formControlName="experience" [min]="0" suffix=" Years" styleClass="w-full"></p-inputNumber>
-                        <small *ngIf="isInvalid('experience')" class="text-red-500">Experience must be non-negative</small>
+                        <small *ngIf="isInvalid('experience')" class="text-red-500">Experience is required (non-negative)</small>
                     </div>
                 </div>
 
@@ -83,9 +97,11 @@ export class DoctorManagementComponent {
 
   doctorForm: FormGroup = this.fb.group({
     name: ['', Validators.required],
+    username: ['', Validators.required],
+    password: ['', Validators.required],
     speciality: ['', Validators.required],
     qualification: ['', Validators.required],
-    experience: [null, [Validators.min(0)]]
+    experience: [null, [Validators.required, Validators.min(0)]]
   });
 
   isInvalid(controlName: string): boolean {
@@ -98,7 +114,9 @@ export class DoctorManagementComponent {
       const val = this.doctorForm.value;
       this.appointmentService.addDoctor({
         name: val.name,
-        speciality: val.speciality
+        speciality: val.speciality,
+        username: val.username,
+        password: val.password
       });
 
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor added successfully' });

@@ -59,15 +59,18 @@ import { DividerModule } from 'primeng/divider';
                     <div class="col-12 md:col-6">
                         <label class="block mb-2 font-bold">Date of Birth</label>
                         <p-calendar formControlName="dob" dateFormat="dd/mm/yy" [showIcon]="true" placeholder="DD/MM/YYYY"></p-calendar>
+                        <small class="text-red-500" *ngIf="isInvalid('dob')">Date of Birth is required</small>
                     </div>
                     <div class="col-12 md:col-6">
                         <label class="block mb-2 font-bold">Gender</label>
                         <p-dropdown [options]="genders" formControlName="gender" placeholder="Select Gender"></p-dropdown>
+                        <small class="text-red-500" *ngIf="isInvalid('gender')">Gender is required</small>
                     </div>
 
                     <div class="col-12 md:col-6">
                         <label class="block mb-2 font-bold">Email</label>
                         <input pInputText formControlName="email" placeholder="email@example.com" />
+                        <small class="text-red-500" *ngIf="isInvalid('email')">Email is required</small>
                     </div>
                     <div class="col-12 md:col-6">
                         <label class="block mb-2 font-bold">Phone</label>
@@ -107,12 +110,12 @@ import { DividerModule } from 'primeng/divider';
                     <div class="col-6 md:col-3">
                         <label class="block mb-2 font-bold">Height (cm)</label>
                         <p-inputNumber formControlName="height" suffix=" cm" [min]="0"></p-inputNumber>
-                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.height')?.invalid && regForm.get('vitals.height')?.touched">Range: 0-300</small>
+                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.height')?.invalid && regForm.get('vitals.height')?.touched">Height is required (0-300)</small>
                     </div>
                     <div class="col-6 md:col-3">
                         <label class="block mb-2 font-bold">Weight (kg)</label>
                         <p-inputNumber formControlName="weight" suffix=" kg" [min]="0" [maxFractionDigits]="1"></p-inputNumber>
-                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.weight')?.invalid && regForm.get('vitals.weight')?.touched">Range: 0-500</small>
+                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.weight')?.invalid && regForm.get('vitals.weight')?.touched">Weight is required (0-500)</small>
                     </div>
                     <div class="col-6 md:col-3">
                         <label class="block mb-2 font-bold">BP (Systolic)</label>
@@ -156,16 +159,16 @@ export class RegistrationComponent {
   regForm: FormGroup = this.fb.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
-    dob: [null],
-    gender: [''],
-    email: ['', [Validators.email]],
-    phone: ['', [Validators.pattern('^[0-9]{10,15}$')]],
+    dob: [null, Validators.required],
+    gender: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    phone: ['', [Validators.required, Validators.pattern('^[0-9]{10,15}$')]],
     address: ['', Validators.required],
     username: ['', Validators.required],
     password: ['', Validators.required],
     vitals: this.fb.group({
-      height: [null, [Validators.min(0), Validators.max(300)]],
-      weight: [null, [Validators.min(0), Validators.max(500)]],
+      height: [null, [Validators.required, Validators.min(0), Validators.max(300)]],
+      weight: [null, [Validators.required, Validators.min(0), Validators.max(500)]],
       bloodPressureSys: [null, [Validators.min(0), Validators.max(300)]],
       bloodPressureDia: [null, [Validators.min(0), Validators.max(300)]],
       heartRate: [null, [Validators.min(0), Validators.max(300)]],

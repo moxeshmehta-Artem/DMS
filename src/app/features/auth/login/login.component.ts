@@ -67,6 +67,7 @@ import { ButtonModule } from 'primeng/button';
             label="Sign In" 
             (onClick)="onLogin()" 
             [loading]="isLoading" 
+            [disabled]="!username || !password"
             styleClass="w-full mt-2">
           </p-button>
         </div>

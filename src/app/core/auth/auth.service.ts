@@ -119,6 +119,24 @@ export class AuthService {
         return true;
     }
 
+    registerDietitian(user: Partial<User>, password: string): User {
+        const newId = Math.max(...this.MOCK_USERS.map(u => u.id)) + 1;
+
+        const newUser: User & { password: string } = {
+            id: newId,
+            username: user.username!,
+            password: password,
+            role: Role.Dietitian,
+            firstName: user.firstName!,
+            lastName: user.lastName!,
+            permissions: ['view_patients', 'schedule_appointment', 'add_diet_plan'],
+            token: '' // No token on registration
+        };
+
+        this.MOCK_USERS.push(newUser);
+        return newUser;
+    }
+
     getAllUsers(): User[] {
         return this.MOCK_USERS;
     }

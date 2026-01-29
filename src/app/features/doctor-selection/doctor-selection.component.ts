@@ -12,6 +12,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ToastModule } from 'primeng/toast';
+import { TableModule } from 'primeng/table'; // Added
 import { MessageService } from 'primeng/api';
 
 @Component({
@@ -26,7 +27,8 @@ import { MessageService } from 'primeng/api';
     CalendarModule,
     DropdownModule,
     InputTextareaModule,
-    ToastModule
+    ToastModule,
+    TableModule // Added
   ],
   providers: [MessageService],
   template: `
@@ -55,21 +57,49 @@ import { MessageService } from 'primeng/api';
             <div class="flex flex-column gap-3 pt-2">
                 <div class="flex flex-column gap-2">
                     <label class="font-bold">Select Date</label>
-                    <p-calendar [(ngModel)]="bookingDate" [minDate]="minDate" [showOnFocus]="false" [showIcon]="true" appendTo="body"></p-calendar>
+                    <p-calendar [(ngModel)]="bookingDate" [minDate]="minDate" [showOnFocus]="false" [showIcon]="true" appendTo="body" (onSelect)="updateAvailableSlots()"></p-calendar>
                 </div>
 
                 <div class="flex flex-column gap-2">
                     <label class="font-bold">Select Time Slot</label>
-                    <p-dropdown [options]="timeSlots" [(ngModel)]="bookingTime" placeholder="Select a time" appendTo="body"></p-dropdown>
+                    <p-dropdown [options]="availableTimeSlots" [(ngModel)]="bookingTime" placeholder="Select a time" appendTo="body" [disabled]="!bookingDate"></p-dropdown>
+                    <small *ngIf="availableTimeSlots.length === 0 && bookingDate" class="text-red-500">No slots available for this date</small>
+                </div>
+
+                <!-- Availability Chart -->
+                <div class="mt-2">
+                    <label class="font-bold block mb-2 text-primary">Doctor's Schedule (Booked Slots)</label>
+                    <p-table [value]="bookedAppointments" [scrollable]="true" scrollHeight="150px" styleClass="p-datatable-sm">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-appt>
+                            <tr>
+                                <td>{{ appt.date | date:'shortDate' }}</td>
+                                <td>{{ appt.timeSlot }}</td>
+                                <td><span class="text-red-500 font-bold">Busy</span></td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="3" class="text-center">No bookings yet. All slots available.</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
                 </div>
 
                 <div class="flex flex-column gap-2">
-                    <label class="font-bold">Reason for Visit</label>
-                    <textarea pInputTextarea [(ngModel)]="description" rows="3" placeholder="Briefly describe your goals..."></textarea>
+                    <label class="font-bold">Reason for Visit <span class="text-red-500">*</span></label>
+                    <textarea pInputTextarea [(ngModel)]="description" rows="3" placeholder="Briefly describe your goals..." [ngClass]="{'ng-invalid ng-dirty': !description && displayBookingDialog}"></textarea>
+                    <small class="text-red-500" *ngIf="!description && displayBookingDialog">Reason is required</small>
                 </div>
             </div>
             <ng-template pTemplate="footer">
-                <p-button label="Confirm Booking" icon="pi pi-check" (onClick)="confirmBooking()" [disabled]="!bookingDate || !bookingTime"></p-button>
+                <p-button label="Confirm Booking" icon="pi pi-check" (onClick)="confirmBooking()" [disabled]="!bookingDate || !bookingTime || !description"></p-button>
             </ng-template>
         </p-dialog>
     </div>
@@ -85,7 +115,9 @@ export class DoctorSelectionComponent implements OnInit {
   description: string = '';
 
   minDate = new Date();
-  timeSlots = ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'];
+  allTimeSlots = ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'];
+  availableTimeSlots: string[] = [];
+  bookedAppointments: any[] = [];
 
   private appointmentService = inject(AppointmentService);
   private authService = inject(AuthService);
@@ -100,13 +132,52 @@ export class DoctorSelectionComponent implements OnInit {
     this.bookingDate = undefined;
     this.bookingTime = undefined;
     this.description = '';
+
+    this.loadDoctorSchedule(doctor.id);
+    this.availableTimeSlots = []; // Reset until date selected
+
     this.displayBookingDialog = true;
   }
 
+  loadDoctorSchedule(doctorId: number) {
+    // Fetch all active appointments for this doctor to display in the chart
+    const allAppts = this.appointmentService.getAppointmentsForDietitian(doctorId);
+    this.bookedAppointments = allAppts.filter(a => a.status === 'Pending' || a.status === 'Confirmed');
+  }
+
+  updateAvailableSlots() {
+    if (!this.bookingDate || !this.selectedDietitian) return;
+
+    const selectedDateStr = this.bookingDate.toDateString();
+
+    // Filter out slots that are already booked for the selected date
+    this.availableTimeSlots = this.allTimeSlots.filter(slot => {
+      const isBooked = this.bookedAppointments.some(appt =>
+        new Date(appt.date).toDateString() === selectedDateStr &&
+        appt.timeSlot === slot
+      );
+      return !isBooked;
+    });
+
+    // Reset selected time if it's no longer available
+    if (this.bookingTime && !this.availableTimeSlots.includes(this.bookingTime)) {
+      this.bookingTime = undefined;
+    }
+  }
+
   confirmBooking() {
-    if (this.selectedDietitian && this.bookingDate && this.bookingTime) {
+    if (this.selectedDietitian && this.bookingDate && this.bookingTime && this.description) {
       const currentUser = this.authService.currentUser();
       if (!currentUser) return;
+
+      if (this.appointmentService.hasActiveAppointment(currentUser.id)) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Restriction',
+          detail: 'You already have an active appointment. Please complete it before booking another.'
+        });
+        return;
+      }
 
       const success = this.appointmentService.bookAppointment({
         patientId: currentUser.id,
