@@ -25,7 +25,7 @@ import { PasswordModule } from 'primeng/password'; // Added
     ToastModule,
     DropdownModule,
     InputNumberModule,
-    PasswordModule // Added
+    PasswordModule
   ],
   providers: [MessageService],
   template: `
@@ -48,8 +48,14 @@ import { PasswordModule } from 'primeng/password'; // Added
 
                 <div class="field">
                     <label class="block font-bold mb-2">Password</label>
-                    <p-password formControlName="password" [feedback]="false" styleClass="w-full" [inputStyle]="{'width':'100%'}"></p-password>
+                    <p-password formControlName="password" [toggleMask]="true" [feedback]="false" styleClass="w-full" [inputStyle]="{'width':'100%'}"></p-password>
                     <small *ngIf="isInvalid('password')" class="text-red-500">Password is required</small>
+                </div>
+
+                <div class="field">
+                    <label class="block font-bold mb-2">Confirm Password</label>
+                    <p-password formControlName="confirmPassword" [toggleMask]="true" [feedback]="false" styleClass="w-full" [inputStyle]="{'width':'100%'}"></p-password>
+                    <small *ngIf="doctorForm.hasError('mismatch') && (doctorForm.get('confirmPassword')?.dirty || doctorForm.get('confirmPassword')?.touched)" class="text-red-500">Passwords do not match</small>
                 </div>
 
                 <div class="field">
@@ -99,14 +105,20 @@ export class DoctorManagementComponent {
     name: ['', Validators.required],
     username: ['', Validators.required],
     password: ['', Validators.required],
+    confirmPassword: ['', Validators.required],
     speciality: ['', Validators.required],
     qualification: ['', Validators.required],
     experience: [null, [Validators.required, Validators.min(0)]]
-  });
+  }, { validators: this.passwordMatchValidator });
 
   isInvalid(controlName: string): boolean {
     const control = this.doctorForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  passwordMatchValidator(g: FormGroup) {
+    return g.get('password')?.value === g.get('confirmPassword')?.value
+      ? null : { 'mismatch': true };
   }
 
   onSubmit() {

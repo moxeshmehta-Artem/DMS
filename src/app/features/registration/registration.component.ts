@@ -100,6 +100,11 @@ import { DividerModule } from 'primeng/divider';
                         <p-password formControlName="password" [toggleMask]="true" [feedback]="false" placeholder="Initial Password"></p-password>
                         <small class="text-red-500" *ngIf="isInvalid('password')">Password is required</small>
                     </div>
+                    <div class="col-12 md:col-6">
+                        <label class="block mb-2 font-bold">Confirm Password</label>
+                        <p-password formControlName="confirmPassword" [toggleMask]="true" [feedback]="false" placeholder="Confirm Password"></p-password>
+                        <small class="text-red-500" *ngIf="regForm.hasError('mismatch') && (regForm.get('confirmPassword')?.dirty || regForm.get('confirmPassword')?.touched)">Passwords do not match</small>
+                    </div>
                 </div>
 
                 <p-divider></p-divider>
@@ -166,6 +171,7 @@ export class RegistrationComponent {
     address: ['', Validators.required],
     username: ['', Validators.required],
     password: ['', Validators.required],
+    confirmPassword: ['', Validators.required],
     vitals: this.fb.group({
       height: [null, [Validators.required, Validators.min(0), Validators.max(300)]],
       weight: [null, [Validators.required, Validators.min(0), Validators.max(500)]],
@@ -174,11 +180,16 @@ export class RegistrationComponent {
       heartRate: [null, [Validators.min(0), Validators.max(300)]],
       temperature: [null, [Validators.min(30), Validators.max(45)]]
     })
-  });
+  }, { validators: this.passwordMatchValidator });
 
   isInvalid(controlName: string): boolean {
     const control = this.regForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  passwordMatchValidator(g: FormGroup) {
+    return g.get('password')?.value === g.get('confirmPassword')?.value
+      ? null : { 'mismatch': true };
   }
 
   onSubmit() {
