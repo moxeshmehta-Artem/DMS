@@ -14,6 +14,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ChipModule } from 'primeng/chip';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
+import { StatusSeverityPipe } from '../../shared/pipes/status-severity.pipe';
 
 @Component({
     selector: 'app-dashboard',
@@ -27,7 +28,8 @@ import { TagModule } from 'primeng/tag';
         AvatarModule,
         ChipModule,
         TableModule,
-        TagModule
+        TagModule,
+        StatusSeverityPipe
     ],
     template: `
     <div class="min-h-screen surface-ground">
@@ -77,7 +79,7 @@ import { TagModule } from 'primeng/tag';
                             <span *ngIf="!patient.latestAppointment">-</span>
                         </td>
                         <td>
-                            <p-tag *ngIf="patient.latestAppointment" [severity]="getSeverity(patient.latestAppointment.status)" [value]="patient.latestAppointment.status"></p-tag>
+                            <p-tag *ngIf="patient.latestAppointment" [severity]="patient.latestAppointment.status | statusSeverity" [value]="patient.latestAppointment.status"></p-tag>
                             <span *ngIf="!patient.latestAppointment">-</span>
                         </td>
                     </tr>
@@ -106,7 +108,7 @@ import { TagModule } from 'primeng/tag';
                         <td>{{ appt.dietitianName }}</td>
                         <td>{{ appt.description }}</td>
                         <td>
-                            <p-tag [value]="appt.status" [severity]="getSeverity(appt.status)"></p-tag>
+                            <p-tag [value]="appt.status" [severity]="appt.status | statusSeverity"></p-tag>
                         </td>
                         <td>
                             <span *ngIf="appt.notes">{{ appt.notes }}</span>
@@ -201,16 +203,6 @@ export class DashboardComponent implements OnInit {
                 latestAppointment: latestAppt
             };
         });
-    }
-
-    getSeverity(status: string): 'success' | 'warning' | 'danger' | 'info' | undefined {
-        switch (status) {
-            case 'Confirmed': return 'success';
-            case 'Pending': return 'warning';
-            case 'Rejected': return 'danger';
-            case 'Completed': return 'info';
-            default: return undefined;
-        }
     }
 
     navigateTo(path: string) {

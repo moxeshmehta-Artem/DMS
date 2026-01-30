@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 import { AuthService } from '../../core/auth/auth.service';
 import { User } from '../../core/models/user.model';
 import { Router } from '@angular/router';
+import { passwordMatchValidator } from '../../shared/validators/match-password.validator';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -180,16 +181,11 @@ export class RegistrationComponent {
       heartRate: [null, [Validators.min(0), Validators.max(300)]],
       temperature: [null, [Validators.min(30), Validators.max(45)]]
     })
-  }, { validators: this.passwordMatchValidator });
+  }, { validators: passwordMatchValidator });
 
   isInvalid(controlName: string): boolean {
     const control = this.regForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
-  }
-
-  passwordMatchValidator(g: FormGroup) {
-    return g.get('password')?.value === g.get('confirmPassword')?.value
-      ? null : { 'mismatch': true };
   }
 
   onSubmit() {

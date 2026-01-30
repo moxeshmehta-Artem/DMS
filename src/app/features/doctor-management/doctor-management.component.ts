@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { MessageService } from 'primeng/api';
+import { passwordMatchValidator } from '../../shared/validators/match-password.validator';
 
 // PrimeNG
 import { CardModule } from 'primeng/card';
@@ -109,16 +110,11 @@ export class DoctorManagementComponent {
     speciality: ['', Validators.required],
     qualification: ['', Validators.required],
     experience: [null, [Validators.required, Validators.min(0)]]
-  }, { validators: this.passwordMatchValidator });
+  }, { validators: passwordMatchValidator });
 
   isInvalid(controlName: string): boolean {
     const control = this.doctorForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
-  }
-
-  passwordMatchValidator(g: FormGroup) {
-    return g.get('password')?.value === g.get('confirmPassword')?.value
-      ? null : { 'mismatch': true };
   }
 
   onSubmit() {
