@@ -1,40 +1,17 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
 import { User } from '../../core/models/user.model';
 import { Router } from '@angular/router';
 import { passwordMatchValidator } from '../../shared/validators/match-password.validator';
-
-// PrimeNG Imports
-import { CardModule } from 'primeng/card';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
-import { CalendarModule } from 'primeng/calendar';
-import { DropdownModule } from 'primeng/dropdown';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { InputTextareaModule } from 'primeng/inputtextarea';
-import { ToastModule } from 'primeng/toast';
+import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 import { MessageService } from 'primeng/api';
-import { PasswordModule } from 'primeng/password';
-import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-registration',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    CardModule,
-    InputTextModule,
-    ButtonModule,
-    CalendarModule,
-    DropdownModule,
-    InputNumberModule,
-    InputTextareaModule,
-    ToastModule,
-    PasswordModule,
-    DividerModule
+    SharedUiModule
   ],
   providers: [MessageService],
   template: `

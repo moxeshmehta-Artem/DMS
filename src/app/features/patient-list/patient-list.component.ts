@@ -1,36 +1,17 @@
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Added for ngModel
+import { DatePipe } from '@angular/common';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { PatientService } from '../../core/services/patient.service'; // Added
-
-// PrimeNG
-import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { AvatarModule } from 'primeng/avatar';
-import { DialogModule } from 'primeng/dialog'; // Added
-import { InputTextareaModule } from 'primeng/inputtextarea'; // Added
-import { ToastModule } from 'primeng/toast'; // Added
-import { MessageService, MenuItem } from 'primeng/api'; // Added
-import { MenuModule } from 'primeng/menu';
+import { PatientService } from '../../core/services/patient.service';
+import { MessageService, MenuItem } from 'primeng/api';
+import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 
 @Component({
   selector: 'app-patient-list',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    CardModule,
-    TableModule,
-    ButtonModule,
-    AvatarModule,
-    DatePipe,
-    DialogModule,
-    InputTextareaModule,
-    ToastModule,
-    MenuModule
+    SharedUiModule,
+    DatePipe
   ],
   providers: [MessageService],
   template: `

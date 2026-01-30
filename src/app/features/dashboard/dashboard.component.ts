@@ -1,34 +1,17 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { Role } from '../../core/models/role.enum';
 import { MENU_ITEMS } from '../../core/constants/permissions';
-
-// PrimeNG
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { MenubarModule } from 'primeng/menubar';
-import { AvatarModule } from 'primeng/avatar';
-import { ChipModule } from 'primeng/chip';
-import { TableModule } from 'primeng/table';
-import { TagModule } from 'primeng/tag';
 import { StatusSeverityPipe } from '../../shared/pipes/status-severity.pipe';
+import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
     imports: [
-        CommonModule,
-        RouterModule,
-        CardModule,
-        ButtonModule,
-        MenubarModule,
-        AvatarModule,
-        ChipModule,
-        TableModule,
-        TagModule,
+        SharedUiModule,
         StatusSeverityPipe
     ],
     template: `

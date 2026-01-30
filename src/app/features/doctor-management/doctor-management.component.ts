@@ -1,32 +1,15 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { MessageService } from 'primeng/api';
 import { passwordMatchValidator } from '../../shared/validators/match-password.validator';
-
-// PrimeNG
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { ToastModule } from 'primeng/toast';
-import { DropdownModule } from 'primeng/dropdown';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { PasswordModule } from 'primeng/password'; // Added
+import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 
 @Component({
   selector: 'app-doctor-management',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    CardModule,
-    ButtonModule,
-    InputTextModule,
-    ToastModule,
-    DropdownModule,
-    InputNumberModule,
-    PasswordModule
+    SharedUiModule
   ],
   providers: [MessageService],
   template: `

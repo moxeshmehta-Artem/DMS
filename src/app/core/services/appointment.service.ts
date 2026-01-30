@@ -1,36 +1,19 @@
 import { Injectable, signal } from '@angular/core';
 import { Appointment } from '../models/appointment.model';
-import { User } from '../models/user.model';
-import { Role } from '../models/role.enum';
-import { AuthService } from '../auth/auth.service'; // Added
-import { inject } from '@angular/core'; // Added
+import { AuthService } from '../auth/auth.service';
+import { inject } from '@angular/core';
+import { INITIAL_APPOINTMENTS, INITIAL_DIETITIANS } from '../constants/mock-data';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AppointmentService {
-    private authService = inject(AuthService); // Added
+    private authService = inject(AuthService);
 
-    private MOCK_APPOINTMENTS: Appointment[] = [
-        {
-            id: 1,
-            patientId: 4,
-            patientName: 'John Doe',
-            dietitianId: 3,
-            dietitianName: 'Sarah Dietitian',
-            date: new Date(),
-            timeSlot: '10:00 AM',
-            status: 'Pending',
-            description: 'Routine checkup'
-        }
-    ];
+    private MOCK_APPOINTMENTS: Appointment[] = [...INITIAL_APPOINTMENTS as unknown as Appointment[]];
 
     // Mock Dietitians (Ideally fetched from UserService)
-    private MOCK_DIETITIANS: { id: number, name: string, speciality: string }[] = [
-        { id: 3, name: 'Sarah Dietitian', speciality: 'Weight Loss' },
-        { id: 10, name: 'Dr. Mike Nutrition', speciality: 'Sports Nutrition' },
-        { id: 11, name: 'Lisa Wellness', speciality: 'Diabetes Management' }
-    ];
+    private MOCK_DIETITIANS: { id: number, name: string, speciality: string }[] = [...INITIAL_DIETITIANS];
 
     getDietitians() {
         return this.MOCK_DIETITIANS;

@@ -1,28 +1,16 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
-
-// PrimeNG Imports
-import { CardModule } from 'primeng/card';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { ButtonModule } from 'primeng/button';
+import { SharedUiModule } from '../../../shared/modules/shared-ui.module';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    CardModule,
-    InputTextModule,
-    PasswordModule,
-    ButtonModule
+    SharedUiModule
   ],
   template: `
-    <div class="flex justify-content-center  surface-ground">
+    <div class="flex justify-content-center align-items-center surface-ground min-h-screen">
       <p-card header="Welcome Back" [style]="{ width: '360px' }" styleClass="shadow-4">
         <ng-template pTemplate="subtitle">
           Please sign in to continue
