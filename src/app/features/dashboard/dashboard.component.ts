@@ -30,49 +30,105 @@ import { SharedUiModule } from '../../shared/modules/shared-ui.module';
             </div>
         </div>
 
-        <!-- FRONTDESK SPECIFIC: Patient Overview -->
-        <div class="surface-card p-4 shadow-2 border-round mt-4" *ngIf="isFrontdesk">
-            <div class="flex align-items-center justify-content-between mb-3">
-                <div class="text-2xl font-medium text-900">Patient Overview</div>
-                <p-button label="Register New Patient" icon="pi pi-user-plus" (onClick)="navigateTo('registration')"></p-button>
+        <!-- FRONTDESK SPECIFIC: Stats & Charts -->
+        <div class="grid mt-4" *ngIf="isFrontdesk">
+            <!-- Stats Cards -->
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="surface-card shadow-2 p-3 border-round">
+                    <div class="flex justify-content-between mb-3">
+                        <div>
+                            <span class="block text-500 font-medium mb-3">Total Patients</span>
+                            <div class="text-900 font-medium text-xl">{{ stats.totalPatients }}</div>
+                        </div>
+                        <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width:2.5rem;height:2.5rem">
+                            <i class="pi pi-users text-blue-500 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-            <p-table [value]="patientOverview" [tableStyle]="{'min-width': '60rem'}">
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th>Patient Name</th>
-                        <th>Username</th>
-                        <th>Registration Status</th>
-                        <th>Last/Next Appointment</th>
-                        <th>Doctor</th>
-                        <th>Status</th>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-patient>
-                    <tr>
-                        <td class="font-bold">{{ patient.firstName }} {{ patient.lastName }}</td>
-                        <td>{{ patient.username }}</td>
-                        <td><p-tag severity="success" value="Registered"></p-tag></td>
-                        <td>
-                            <span *ngIf="patient.latestAppointment">{{ patient.latestAppointment.date | date:'shortDate' }}</span>
-                            <span *ngIf="!patient.latestAppointment" class="text-500">None</span>
-                        </td>
-                        <td>
-                            <span *ngIf="patient.latestAppointment">{{ patient.latestAppointment.dietitianName }}</span>
-                            <span *ngIf="!patient.latestAppointment">-</span>
-                        </td>
-                        <td>
-                            <p-tag *ngIf="patient.latestAppointment" [severity]="patient.latestAppointment.status | statusSeverity" [value]="patient.latestAppointment.status"></p-tag>
-                            <span *ngIf="!patient.latestAppointment">-</span>
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="surface-card shadow-2 p-3 border-round">
+                    <div class="flex justify-content-between mb-3">
+                        <div>
+                            <span class="block text-500 font-medium mb-3">Appointments (All)</span>
+                            <div class="text-900 font-medium text-xl">{{ stats.totalAppointments }}</div>
+                        </div>
+                        <div class="flex align-items-center justify-content-center bg-orange-100 border-round" style="width:2.5rem;height:2.5rem">
+                            <i class="pi pi-calendar text-orange-500 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="surface-card shadow-2 p-3 border-round">
+                    <div class="flex justify-content-between mb-3">
+                        <div>
+                            <span class="block text-500 font-medium mb-3">Pending</span>
+                            <div class="text-900 font-medium text-xl">{{ stats.pendingAppointments }}</div>
+                        </div>
+                        <div class="flex align-items-center justify-content-center bg-cyan-100 border-round" style="width:2.5rem;height:2.5rem">
+                            <i class="pi pi-clock text-cyan-500 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="surface-card shadow-2 p-3 border-round">
+                    <div class="flex justify-content-between mb-3">
+                        <div>
+                            <span class="block text-500 font-medium mb-3">Today's</span>
+                            <div class="text-900 font-medium text-xl">{{ stats.todaysAppointments }}</div>
+                        </div>
+                        <div class="flex align-items-center justify-content-center bg-purple-100 border-round" style="width:2.5rem;height:2.5rem">
+                            <i class="pi pi-calendar-plus text-purple-500 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="col-12 md:col-6">
+                <div class="surface-card shadow-2 p-4 border-round flex flex-column align-items-center">
+                    <h5 class="text-xl font-bold mb-4 align-self-start">Appointment Status</h5>
+                    <p-chart type="doughnut" [data]="chartData" [options]="chartOptions" width="400px" height="400px"></p-chart>
+                </div>
+            </div>
+            <div class="col-12 md:col-6">
+                <div class="surface-card shadow-2 p-4 border-round h-full flex flex-column align-items-center">
+                    <h5 class="text-xl font-bold mb-4 align-self-start">Upcoming Schedule</h5>
+                    <p-chart type="bar" [data]="barChartData" [options]="barChartOptions" width="400px" height="400px"></p-chart>
+                </div>
+            </div>
         </div>
 
+       
+
         <!-- PATIENT SPECIFIC: My Appointments -->
-        <div class="surface-card p-4 shadow-2 border-round mt-4" *ngIf="isPatient">
-            <div class="text-2xl font-medium text-900 mb-3">My Appointments</div>
+        <div class="mt-4" *ngIf="isPatient">
+            <!-- Next Appointment Card -->
+            <div class="grid mb-4" *ngIf="nextAppointment">
+                <div class="col-12 md:col-6">
+                    <div class="surface-card shadow-2 p-4 border-round border-left-3 border-primary-500">
+                        <div class="text-xl font-medium text-900 mb-2">Next Appointment</div>
+                        <div class="flex align-items-center gap-3">
+                            <div class="text-4xl font-bold text-primary">{{ nextAppointment.date | date:'d' }}</div>
+                            <div>
+                                <div class="text-xl font-semibold">{{ nextAppointment.date | date:'MMMM y' }}</div>
+                                <div class="text-600">{{ nextAppointment.timeSlot }}</div>
+                            </div>
+                            <div class="ml-auto">
+                                <p-tag [severity]="nextAppointment.status === 'Confirmed' ? 'success' : 'warning'" [value]="nextAppointment.status"></p-tag>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-600">
+                            with <span class="font-medium text-900">{{ nextAppointment.dietitianName }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="surface-card p-4 shadow-2 border-round">
+                <div class="text-2xl font-medium text-900 mb-3">My Appointments</div>
             <p-table [value]="myAppointments" [tableStyle]="{'min-width': '50rem'}">
                 <ng-template pTemplate="header">
                     <tr>
@@ -105,6 +161,7 @@ import { SharedUiModule } from '../../shared/modules/shared-ui.module';
                     </tr>
                 </ng-template>
             </p-table>
+            </div>
         </div>
 
         <div class="surface-card p-4 shadow-2 border-round mt-4" *ngIf="!isFrontdesk && !isPatient">
@@ -141,6 +198,21 @@ export class DashboardComponent implements OnInit {
     isFrontdesk = false;
     isPatient = false;
 
+    // Frontdesk Charts & Stats
+    chartData: any;
+    chartOptions: any;
+    barChartData: any;
+    barChartOptions: any;
+    stats = {
+        totalPatients: 0,
+        totalAppointments: 0,
+        pendingAppointments: 0,
+        todaysAppointments: 0
+    };
+
+    // Patient Stats
+    nextAppointment: any = null;
+
     private appointmentService = inject(AppointmentService);
 
     constructor(private authService: AuthService, private router: Router) { }
@@ -158,6 +230,7 @@ export class DashboardComponent implements OnInit {
 
             if (this.isFrontdesk) {
                 this.loadPatientOverview();
+                this.initCharts();
             } else if (this.isPatient) {
                 this.loadMyAppointments();
             }
@@ -168,6 +241,12 @@ export class DashboardComponent implements OnInit {
         const user = this.currentUser();
         if (user) {
             this.myAppointments = this.appointmentService.getAppointmentsForPatient(user.id);
+
+            // Find next upcoming appointment
+            const now = new Date();
+            this.nextAppointment = this.myAppointments
+                .filter(a => new Date(a.date) >= now && (a.status === 'Confirmed' || a.status === 'Pending'))
+                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
         }
     }
 
@@ -175,6 +254,17 @@ export class DashboardComponent implements OnInit {
         const allUsers = this.authService.getAllUsers();
         const patients = allUsers.filter(u => u.role === Role.Patient);
         const allAppointments = this.appointmentService.getAllAppointments();
+
+        // Calculate Stats
+        this.stats.totalPatients = patients.length;
+        this.stats.totalAppointments = allAppointments.length;
+        this.stats.pendingAppointments = allAppointments.filter(a => a.status === 'Pending').length;
+
+        const today = new Date().toDateString();
+        this.stats.todaysAppointments = allAppointments.filter(a => new Date(a.date).toDateString() === today).length;
+
+        // Prepare Chart Data
+        this.prepareCharts(allAppointments);
 
         this.patientOverview = patients.map(patient => {
             // Find latest appointment
@@ -186,6 +276,96 @@ export class DashboardComponent implements OnInit {
                 latestAppointment: latestAppt
             };
         });
+    }
+
+    prepareCharts(appointments: any[]) {
+        // Doughnut Chart: Status Distribution
+        const statuses = ['Confirmed', 'Pending', 'Completed', 'Rejected'];
+        const statusCounts = statuses.map(status => appointments.filter(a => a.status === status).length);
+
+        this.chartData = {
+            labels: statuses,
+            datasets: [
+                {
+                    data: statusCounts,
+                    backgroundColor: ['#22C55E', '#F59E0B', '#3B82F6', '#EF4444'],
+                    hoverBackgroundColor: ['#16A34A', '#D97706', '#2563EB', '#DC2626']
+                }
+            ]
+        };
+
+        this.chartOptions = {
+            plugins: {
+                legend: {
+                    labels: {
+                        usePointStyle: true,
+                        color: '#495057'
+                    }
+                }
+            }
+        };
+
+        // Bar Chart: Upcoming vs Past (Simple week view)
+        // For simplicity, let's show appointments per day for the next 5 days
+        const labels = [];
+        const data = [];
+        const today = new Date();
+
+        for (let i = 0; i < 5; i++) {
+            const date = new Date(today);
+            date.setDate(today.getDate() + i);
+            labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+
+            const count = appointments.filter(a => new Date(a.date).toDateString() === date.toDateString()).length;
+            data.push(count);
+        }
+
+        this.barChartData = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Appointments',
+                    data: data,
+                    backgroundColor: '#6366f1',
+                    borderColor: '#4f46e5',
+                    borderWidth: 1
+                }
+            ]
+        };
+
+        this.barChartOptions = {
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#495057'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#495057',
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: '#ebedef'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#495057'
+                    },
+                    grid: {
+                        color: '#ebedef'
+                    }
+                }
+            }
+        };
+    }
+
+    initCharts() {
+        // Helper if needed, but logic is in prepareCharts called by loadPatientOverview
     }
 
     navigateTo(path: string) {

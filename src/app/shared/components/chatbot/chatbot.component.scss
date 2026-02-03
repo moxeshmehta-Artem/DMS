@@ -1,0 +1,34 @@
+// Custom scrollbar for message area
+.overflow-y-auto {
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--surface-300);
+        border-radius: 20px;
+    }
+}
+
+// Fade in animation class (if not using global css)
+.fadeinup {
+    animation-name: fadeinup;
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+}
+
+@keyframes fadeinup {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

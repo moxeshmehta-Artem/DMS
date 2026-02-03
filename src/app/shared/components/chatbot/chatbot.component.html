@@ -1,0 +1,85 @@
+<!-- Floating Toggle Button -->
+<div *ngIf="isPatient" class="fixed bottom-0 right-0 m-4 z-5">
+    <button pButton type="button" [icon]="isOpen ? 'pi pi-times' : 'pi pi-comment'" (click)="toggleChat()"
+        class="p-button-rounded p-button-lg p-button-raised shadow-6 w-4rem h-4rem border-circle bg-primary-500 hover:bg-primary-600 transition-colors transition-duration-300">
+    </button>
+</div>
+
+<!-- Chat Window -->
+<div *ngIf="isOpen" class="fixed bottom-0 right-0 m-4 mb-8 z-4 fadeinup animation-duration-300"
+    style="width: 380px; max-width: 90vw;">
+    <div class="surface-card shadow-8 border-round-xl overflow-hidden flex flex-column"
+        style="height: 550px; max-height: 80vh;">
+
+        <!-- Header -->
+        <div class="bg-primary-500 text-white p-3 flex align-items-center gap-3">
+            <div class="flex align-items-center justify-content-center bg-white border-circle w-3rem h-3rem">
+                <i class="pi pi-bolt text-primary-500 text-xl"></i>
+            </div>
+            <div>
+                <div class="font-bold text-lg">DMS Nutrition AI</div>
+                <div class="text-xs opacity-90">Always here to help 24/7</div>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div #scrollContainer class="flex-grow-1 overflow-y-auto p-3 flex flex-column gap-3 bg-bluegray-50">
+
+            <div *ngFor="let msg of chatbotService.messages()" class="flex flex-column gap-1"
+                [ngClass]="{'align-items-end': msg.sender === 'user', 'align-items-start': msg.sender === 'bot'}">
+
+                <!-- Message Bubble -->
+                <div class="p-3 shadow-1 max-w-20rem text-sm line-height-3" [ngClass]="{
+                        'bg-primary-500 text-white border-round-left-xl border-round-top-right-xl': msg.sender === 'user',
+                        'bg-white text-color border-round-right-xl border-round-top-left-xl': msg.sender === 'bot'
+                     }">
+
+                    <!-- Optional Image Attachment -->
+                    <img *ngIf="msg.imageUrl" [src]="msg.imageUrl" class="w-full border-round-lg mb-2 block">
+
+                    <!-- Text Content -->
+                    <span [innerHTML]="msg.text | slice:0:500"></span>
+                    <!-- Simple slice for now, full markdown later -->
+                </div>
+
+                <small class="text-xs text-500 px-1">
+                    {{ msg.timestamp | date:'shortTime' }}
+                </small>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div *ngIf="chatbotService.isLoading()" class="flex align-items-center gap-2 text-500 text-sm p-2">
+                <p-progressSpinner styleClass="w-2rem h-2rem" strokeWidth="4"></p-progressSpinner>
+                <span>Analyzing your meal...</span>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-3 surface-0 border-top-1 surface-border">
+
+            <!-- File Preview if selected -->
+            <div *ngIf="selectedFile" class="flex align-items-center gap-2 mb-2 p-2 surface-100 border-round-lg">
+                <i class="pi pi-image text-primary"></i>
+                <span class="text-xs text-overflow-ellipsis overflow-hidden white-space-nowrap flex-grow-1">{{
+                    selectedFile.name }}</span>
+                <i class="pi pi-times cursor-pointer text-500 hover:text-red-500" (click)="clearFile()"></i>
+            </div>
+
+            <div class="flex gap-2">
+                <!-- Hidden File Input -->
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden">
+
+                <button pButton icon="pi pi-camera" class="p-button-rounded p-button-text p-button-secondary"
+                    pTooltip="Add Photo" tooltipPosition="top" (click)="fileInput.click()">
+                </button>
+
+                <input type="text" pInputText [(ngModel)]="userInput" (keydown.enter)="sendMessage()"
+                    placeholder="Ask about calories..." class="flex-grow-1 border-round-2xl pl-3" />
+
+                <button pButton icon="pi pi-send" class="p-button-rounded p-button-primary"
+                    [disabled]="!userInput && !selectedFile" (click)="sendMessage()">
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

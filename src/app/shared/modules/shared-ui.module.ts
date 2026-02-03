@@ -22,6 +22,7 @@ import { ChipModule } from 'primeng/chip';
 import { MenubarModule } from 'primeng/menubar';
 import { DividerModule } from 'primeng/divider';
 import { MenuModule } from 'primeng/menu';
+import { ChartModule } from 'primeng/chart';
 
 @NgModule({
     imports: [
@@ -45,7 +46,8 @@ import { MenuModule } from 'primeng/menu';
         ChipModule,
         MenubarModule,
         DividerModule,
-        MenuModule
+        MenuModule,
+        ChartModule
     ],
     exports: [
         CommonModule,
@@ -68,7 +70,8 @@ import { MenuModule } from 'primeng/menu';
         ChipModule,
         MenubarModule,
         DividerModule,
-        MenuModule
+        MenuModule,
+        ChartModule
     ]
 })
 export class SharedUiModule { }

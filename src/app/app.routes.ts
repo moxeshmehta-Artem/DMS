@@ -1,13 +1,15 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard, noAuthGuard } from './core/auth/auth.guard';
 import { Role } from './core/models/role.enum';
 
 export const routes: Routes = [
     // Auth Login Route
     {
         path: 'auth/login',
+        canActivate: [noAuthGuard],
         loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent)
     },
+
     {
         path: 'dashboard',
         loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
