@@ -30,6 +30,8 @@ import { SharedUiModule } from '../../shared/modules/shared-ui.module';
             </div>
         </div>
 
+        
+
         <!-- FRONTDESK SPECIFIC: Stats & Charts -->
         <div class="grid mt-4" *ngIf="isFrontdesk">
             <!-- Stats Cards -->
@@ -86,20 +88,101 @@ import { SharedUiModule } from '../../shared/modules/shared-ui.module';
                 </div>
             </div>
 
+            <div class="col-12">
+            <div class="surface-card p-4 shadow-2 border-round mt-4" *ngIf="isFrontdesk">
+            <div class="flex justify-content-between align-items-center mb-3">
+                <div class="text-2xl font-medium text-900">Registered Patients</div>
+                <button pButton icon="pi pi-user-plus" label="Register New" (click)="navigateTo('/registration')" class="p-button-sm"></button>
+            </div>
+            
+            <p-table [value]="patientOverview" [paginator]="true" [rows]="5" responsiveLayout="stack" [breakpoint]="'960px'">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th pSortableColumn="firstName">Name <p-sortIcon field="firstName"></p-sortIcon></th>
+                        <th pSortableColumn="dob">Age <p-sortIcon field="dob"></p-sortIcon></th>
+                        <th>Gender</th>
+                        <th>Contact</th>
+                        <th>Vitals (Latest)</th>
+                        <th>Latest Appointment</th>
+                        <th>Status</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-patient>
+                    <tr>
+                        <td>
+                            <span class="p-column-title font-bold mr-2">Name</span>
+                            <div class="inline-block vertical-align-middle">
+                                <div class="font-medium">{{ patient.firstName }} {{ patient.lastName }}</div>
+                                <small class="text-500">{{ patient.username }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="p-column-title font-bold mr-2">Age</span>
+                            <!-- Simple age calculation for display -->
+                            {{ getAge(patient.dob) }} yrs
+                        </td>
+                        <td>
+                            <span class="p-column-title font-bold mr-2">Gender</span>
+                            {{ patient.gender }}
+                        </td>
+                        <td>
+                            <span class="p-column-title font-bold mr-2">Contact</span>
+                            <div class="inline-block vertical-align-middle">
+                                <div>{{ patient.phone }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="p-column-title font-bold mr-2">Vitals</span>
+                            <div *ngIf="patient.vitals" class="text-sm inline-flex gap-3 vertical-align-middle">
+                                <div><i class="pi pi-arrows-v text-primary mr-1"></i> {{ patient.vitals.height }}cm</div>
+                                <div><i class="pi pi-stop text-primary mr-1"></i> {{ patient.vitals.weight }}kg</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="p-column-title font-bold mr-2">Latest Appt</span>
+                            <div *ngIf="patient.latestAppointment" class="inline-block vertical-align-middle pl-6">
+                                <div class="font-medium" >{{ patient.latestAppointment.date | date:'shortDate' }}</div>
+                            </div>
+                            <span *ngIf="!patient.latestAppointment" class="text-500">-</span>
+                        </td>
+                        <td>
+                            <span class="p-column-title font-bold mr-2">Status</span>
+                             <div class="flex align-items-center gap-2">
+                                <p-tag *ngIf="patient.latestAppointment" [severity]="patient.latestAppointment.status | statusSeverity" [value]="patient.latestAppointment.status"></p-tag>
+                             </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="7" class="text-center p-4">No patients registered yet.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+        </div>
+
             <!-- Charts -->
             <div class="col-12 md:col-6">
                 <div class="surface-card shadow-2 p-4 border-round flex flex-column align-items-center">
                     <h5 class="text-xl font-bold mb-4 align-self-start">Appointment Status</h5>
-                    <p-chart type="doughnut" [data]="chartData" [options]="chartOptions" width="400px" height="400px"></p-chart>
+                    <div class="w-full relative" style="height: 300px;">
+                        <p-chart type="doughnut" [data]="chartData" [options]="chartOptions" class=" w-full"></p-chart>
+                    </div>
                 </div>
             </div>
             <div class="col-12 md:col-6">
                 <div class="surface-card shadow-2 p-4 border-round h-full flex flex-column align-items-center">
                     <h5 class="text-xl font-bold mb-4 align-self-start">Upcoming Schedule</h5>
-                    <p-chart type="bar" [data]="barChartData" [options]="barChartOptions" width="400px" height="400px"></p-chart>
+                    <div class="w-full relative" style="height: 300px;">
+                        <p-chart type="bar" [data]="barChartData" [options]="barChartOptions" class="h-full w-full" height="300px"></p-chart>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- FRONTDESK SPECIFIC: Registered Patients List -->
+      
 
        
 
@@ -295,6 +378,8 @@ export class DashboardComponent implements OnInit {
         };
 
         this.chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     labels: {
@@ -328,12 +413,15 @@ export class DashboardComponent implements OnInit {
                     data: data,
                     backgroundColor: '#6366f1',
                     borderColor: '#4f46e5',
-                    borderWidth: 1
+                    borderWidth: 1,
+                    barThickness: 40 // Fixed thickness
                 }
             ]
         };
 
         this.barChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     labels: {
@@ -344,9 +432,10 @@ export class DashboardComponent implements OnInit {
             scales: {
                 y: {
                     beginAtZero: true,
+
                     ticks: {
                         color: '#495057',
-                        stepSize: 1
+                        stepSize: 5
                     },
                     grid: {
                         color: '#ebedef'
@@ -370,6 +459,18 @@ export class DashboardComponent implements OnInit {
 
     navigateTo(path: string) {
         this.router.navigate([path]);
+    }
+
+    getAge(dob: any): number {
+        if (!dob) return 0;
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
     }
 
     logout() {
