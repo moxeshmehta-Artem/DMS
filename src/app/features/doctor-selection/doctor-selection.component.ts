@@ -142,7 +142,7 @@ export class DoctorSelectionComponent implements OnInit {
   loadDoctorSchedule(doctorId: number) {
     // Fetch all active appointments for this doctor to display in the chart
     const allAppts = this.appointmentService.getAppointmentsForDietitian(doctorId);
-    this.bookedAppointments = allAppts.filter(a => a.status === 'Pending' || a.status === 'Confirmed');
+    this.bookedAppointments = allAppts.filter(a => a.status === 'Confirmed');
   }
 
   updateAvailableSlots() {

@@ -70,7 +70,7 @@ export class AppointmentService {
             a.dietitianId === dietitianId &&
             new Date(a.date).toDateString() === new Date(date).toDateString() &&
             a.timeSlot === timeSlot &&
-            (a.status === 'Pending' || a.status === 'Confirmed')
+            a.status === 'Confirmed'
         );
     }
 
