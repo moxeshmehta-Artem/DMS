@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, computed, inject } from '@angular/core';
+import { RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
+import { AuthService } from './core/auth/auth.service';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-root',
@@ -12,11 +14,9 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
 })
 export class AppComponent {
   title = 'DMS';
-
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // Compute menu items based on auth state
   items = computed<MenuItem[]>(() => {
     if (this.authService.currentUser()) {
       return [
