@@ -17,10 +17,10 @@ export const routes: Routes = [
     },
     // FEATURES
     {
-        path: 'doctor-management',
+        path: 'add-dietitian',
         canActivate: [authGuard],
-        data: { roles: [Role.Admin] }, // Keeping role guard for now, could switch to permission guard later
-        loadComponent: () => import('./features/doctor-management/doctor-management.component').then(m => m.DoctorManagementComponent)
+        data: { roles: [Role.Admin] },
+        loadComponent: () => import('./features/dietitian-management/add-dietitian/add-dietitian.component').then(m => m.AddDietitianComponent)
     },
     {
         path: 'dietitian-management',

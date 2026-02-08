@@ -7,7 +7,7 @@ export const PERMISSIONS = {
     },
     [Role.Admin]: {
         canManageDietitians: true,
-        canAddDoctor: true
+        canAddDietitian: true
     },
     [Role.Dietitian]: {
         canViewPatients: true,
@@ -26,7 +26,7 @@ export const MENU_ITEMS = {
     ],
     [Role.Admin]: [
         { label: 'Manage Dietitians', icon: 'pi pi-users', routerLink: '/dietitian-management' },
-        { label: 'Add Doctor', icon: 'pi pi-plus', routerLink: '/doctor-management' }
+        { label: 'Add Dietitian', icon: 'pi pi-plus', routerLink: '/add-dietitian' }
     ],
     [Role.Dietitian]: [
         { label: 'My Patients', icon: 'pi pi-list', routerLink: '/patient-list' },

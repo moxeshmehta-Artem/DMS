@@ -19,34 +19,34 @@ export class AppointmentService {
         return this.MOCK_DIETITIANS;
     }
 
-    addDoctor(doctor: { name: string, speciality: string, username?: string, password?: string }) {
-        if (doctor.username && doctor.password) {
+    addDietitian(dietitian: { name: string, speciality: string, username?: string, password?: string }) {
+        if (dietitian.username && dietitian.password) {
             // Create User Account first
-            const nameParts = doctor.name.split(' ');
+            const nameParts = dietitian.name.split(' ');
             const newUser = this.authService.registerDietitian({
                 firstName: nameParts[0],
                 lastName: nameParts.slice(1).join(' '),
-                username: doctor.username
-            }, doctor.password);
+                username: dietitian.username
+            }, dietitian.password);
 
-            // Use the User ID for the Doctor
+            // Use the User ID for the Dietitian
             this.MOCK_DIETITIANS.push({
                 id: newUser.id,
-                name: doctor.name,
-                speciality: doctor.speciality
+                name: dietitian.name,
+                speciality: dietitian.speciality
             });
         } else {
             // Fallback for legacy (should not happen with new form)
             const newId = Math.max(...this.MOCK_DIETITIANS.map(d => d.id)) + 1;
             this.MOCK_DIETITIANS.push({
                 id: newId,
-                name: doctor.name,
-                speciality: doctor.speciality
+                name: dietitian.name,
+                speciality: dietitian.speciality
             });
         }
     }
 
-    removeDoctor(id: number) {
+    removeDietitian(id: number) {
         this.MOCK_DIETITIANS = this.MOCK_DIETITIANS.filter(d => d.id !== id);
     }
 

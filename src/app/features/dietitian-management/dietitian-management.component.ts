@@ -1,7 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppointmentService } from '../../core/services/appointment.service';
-import { AuthService } from '../../core/auth/auth.service';
 import { MessageService } from 'primeng/api';
 
 // PrimeNG
@@ -10,6 +9,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { AvatarModule } from 'primeng/avatar';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-dietitian-management',
@@ -20,12 +20,15 @@ import { AvatarModule } from 'primeng/avatar';
     TableModule,
     ButtonModule,
     TagModule,
-    AvatarModule
+    AvatarModule,
+    ToastModule
   ],
   providers: [MessageService],
   template: `
     <div class="p-4">
-        <p-card header="Dietitian Management" subheader="View and manage current dietitians">
+        <p-toast></p-toast>
+        <!-- List Dietitians -->
+        <p-card header="Dietitian List" subheader="View and manage current dietitians">
             <p-table [value]="dietitians" [tableStyle]="{ 'min-width': '50rem' }">
                 <ng-template pTemplate="header">
                     <tr>
@@ -65,7 +68,6 @@ export class DietitianManagementComponent implements OnInit {
   dietitians: any[] = [];
 
   private appointmentService = inject(AppointmentService);
-  private authService = inject(AuthService);
   private messageService = inject(MessageService);
 
   ngOnInit() {
@@ -78,7 +80,7 @@ export class DietitianManagementComponent implements OnInit {
 
   deleteDietitian(doc: any) {
     if (confirm(`Are you sure you want to remove ${doc.name}?`)) {
-      this.appointmentService.removeDoctor(doc.id);
+      this.appointmentService.removeDietitian(doc.id);
       this.messageService.add({ severity: 'success', summary: 'Removed', detail: 'Dietitian removed successfully' });
       this.refreshList();
     }

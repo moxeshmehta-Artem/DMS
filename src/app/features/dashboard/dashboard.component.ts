@@ -55,7 +55,7 @@ import { PatientDashboardComponent } from './components/patient-dashboard/patien
             <div class="flex flex-wrap gap-2" *ngIf="userPermissions; else noPermissions">
                 <p-chip *ngIf="userPermissions.includes('register_patient')" label="" icon="pi pi-check"></p-chip>
                 <p-chip *ngIf="userPermissions.includes('manage_dietitians')" label="Manage Dietitians" icon="pi pi-check"></p-chip>
-                <p-chip *ngIf="userPermissions.includes('manage_doctors')" label="Add Doctor" icon="pi pi-check"></p-chip>
+                <p-chip *ngIf="userPermissions.includes('add_dietitian')" label="Add Dietitian" icon="pi pi-check"></p-chip>
                 <p-chip *ngIf="userPermissions.includes('view_patients')" label="View Patients" icon="pi pi-check"></p-chip>
                 <p-chip *ngIf="userPermissions.includes('schedule_appointment')" label="Schedule Appointment" icon="pi pi-check"></p-chip>
                 <p-chip *ngIf="userPermissions.includes('add_diet_plan')" label="Add Diet Plan" icon="pi pi-check"></p-chip>

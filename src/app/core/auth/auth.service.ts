@@ -32,7 +32,7 @@ export class AuthService {
             role: Role.Admin,
             firstName: 'Super',
             lastName: 'Admin',
-            permissions: ['manage_doctors', 'manage_dietitians']
+            permissions: ['add_dietitian', 'manage_dietitians']
         },
         {
             id: 2,
