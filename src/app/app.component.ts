@@ -13,4 +13,33 @@ import { ChatbotComponent } from './shared/components/chatbot/chatbot.component'
 })
 export class AppComponent {
   title = 'DMS';
+
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  // Compute menu items based on auth state
+  items = computed<MenuItem[]>(() => {
+    if (this.authService.currentUser()) {
+      return [
+        {
+          label: 'Dashboard',
+          icon: 'pi pi-home',
+          command: () => this.router.navigate(['/dashboard'])
+        },
+        {
+          label: 'User: ' + this.authService.currentUser()?.firstName,
+          icon: 'pi pi-user',
+          styleClass: 'ml-auto',
+          items: [
+            {
+              label: 'Logout',
+              icon: 'pi pi-power-off',
+              command: () => this.authService.logout()
+            }
+          ]
+        }
+      ];
+    }
+    return [];
+  });
 }
