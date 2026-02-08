@@ -10,7 +10,9 @@ export class AuthService {
     private readonly USER_KEY = 'mock_auth_user';
     currentUser = signal<User | null>(null);
 
-    constructor(private router: Router) {
+    constructor(
+        private router: Router
+    ) {
         this.restoreSession();
     }
 
@@ -18,7 +20,8 @@ export class AuthService {
         if (typeof localStorage !== 'undefined') {
             const stored = localStorage.getItem(this.USER_KEY);
             if (stored) {
-                this.currentUser.set(JSON.parse(stored));
+                const user = JSON.parse(stored);
+                this.currentUser.set(user);
             }
         }
     }

@@ -23,12 +23,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dietitian-management/add-dietitian/add-dietitian.component').then(m => m.AddDietitianComponent)
     },
     {
-        path: 'dietitian-management',
-        canActivate: [authGuard],
-        data: { roles: [Role.Admin] },
-        loadComponent: () => import('./features/dietitian-management/dietitian-management.component').then(m => m.DietitianManagementComponent)
-    },
-    {
         path: 'registration',
         canActivate: [authGuard],
         data: { roles: [Role.Frontdesk] },

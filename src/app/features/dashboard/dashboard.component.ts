@@ -7,6 +7,7 @@ import { MENU_ITEMS } from '../../core/constants/permissions';
 import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 import { FrontDeskDashboardComponent } from './components/front-desk-dashboard/front-desk-dashboard.component';
 import { PatientDashboardComponent } from './components/patient-dashboard/patient-dashboard.component';
+import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 
 @Component({
     selector: 'app-dashboard',
@@ -15,7 +16,8 @@ import { PatientDashboardComponent } from './components/patient-dashboard/patien
         CommonModule, // Add CommonModule to imports
         SharedUiModule,
         FrontDeskDashboardComponent,
-        PatientDashboardComponent
+        PatientDashboardComponent,
+        AdminDashboardComponent
     ],
     template: `
     <div class="min-h-screen surface-ground">
@@ -44,8 +46,11 @@ import { PatientDashboardComponent } from './components/patient-dashboard/patien
         <!-- PATIENT DASHBOARD -->
         <app-patient-dashboard *ngIf="isPatient"></app-patient-dashboard>
 
+        <!-- ADMIN DASHBOARD -->
+        <app-admin-dashboard *ngIf="isAdmin"></app-admin-dashboard>
+
         <!-- NO ROLE / GENERIC VIEW -->
-        <div class="surface-card p-4 shadow-2 border-round mt-4" *ngIf="!isFrontdesk && !isPatient">
+        <div class="surface-card p-4 shadow-2 border-round mt-4" *ngIf="!isFrontdesk && !isPatient && !isAdmin">
             <div class="text-2xl font-medium text-900 mb-3">Welcome to your Dashboard</div>
             <p class="text-600 line-height-3 mb-4">
                 You are logged in as <strong>{{ currentUser()?.username }}</strong>. 
@@ -54,7 +59,6 @@ import { PatientDashboardComponent } from './components/patient-dashboard/patien
             
             <div class="flex flex-wrap gap-2" *ngIf="userPermissions; else noPermissions">
                 <p-chip *ngIf="userPermissions.includes('register_patient')" label="" icon="pi pi-check"></p-chip>
-                <p-chip *ngIf="userPermissions.includes('manage_dietitians')" label="Manage Dietitians" icon="pi pi-check"></p-chip>
                 <p-chip *ngIf="userPermissions.includes('add_dietitian')" label="Add Dietitian" icon="pi pi-check"></p-chip>
                 <p-chip *ngIf="userPermissions.includes('view_patients')" label="View Patients" icon="pi pi-check"></p-chip>
                 <p-chip *ngIf="userPermissions.includes('schedule_appointment')" label="Schedule Appointment" icon="pi pi-check"></p-chip>
@@ -75,6 +79,7 @@ export class DashboardComponent implements OnInit {
     menuItems: any[] = [];
     isFrontdesk = false;
     isPatient = false;
+    isAdmin = false;
 
     constructor(private authService: AuthService, private router: Router) { }
 
@@ -88,6 +93,7 @@ export class DashboardComponent implements OnInit {
             this.menuItems = MENU_ITEMS[role] || [];
             this.isFrontdesk = role === Role.Frontdesk;
             this.isPatient = role === Role.Patient;
+            this.isAdmin = role === Role.Admin;
         }
     }
 

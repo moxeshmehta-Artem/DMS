@@ -25,7 +25,6 @@ export const MENU_ITEMS = {
         { label: 'Register Patient', icon: 'pi pi-user-plus', routerLink: '/registration' }
     ],
     [Role.Admin]: [
-        { label: 'Manage Dietitians', icon: 'pi pi-users', routerLink: '/dietitian-management' },
         { label: 'Add Dietitian', icon: 'pi pi-plus', routerLink: '/add-dietitian' }
     ],
     [Role.Dietitian]: [
