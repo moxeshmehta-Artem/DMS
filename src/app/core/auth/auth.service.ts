@@ -95,8 +95,11 @@ export class AuthService {
             username: userModel.username,
             email: userModel.email || '', // Ensure email is present
             password: password,
-            role: Role.Patient,
+            role: 'ROLE_PATIENT',
+            firstName: userModel.firstName,
+            lastName: userModel.lastName
         };
+        console.log('Registering Patient with payload:', signupRequest);
         // Note: detailed medical info (vitals, address) might need a separate endpoint 
         // or the backend SignupRequest needs to be updated. 
         // For now we register the user account.
