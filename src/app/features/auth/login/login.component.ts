@@ -38,7 +38,8 @@ import { SharedUiModule } from '../../../shared/modules/shared-ui.module';
               [(ngModel)]="password" 
               #pass="ngModel"
               required
-              [feedback]="false" 
+              [feedback]="false"
+              [toggleMask]="true" 
               placeholder="Enter your password"
               [style]="{'width':'100%'}" 
               [inputStyle]="{'width':'100%'}">
