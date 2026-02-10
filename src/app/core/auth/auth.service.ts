@@ -1,18 +1,50 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { User } from '../models/user.model';
 import { Role } from '../models/role.enum';
+import { tap, catchError, map } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+
+// Aligning with Backend DTOs
+export interface JwtResponse {
+    token: string;
+    id: number;
+    username: string;
+    email: string;
+    roles: string[];
+    type: string;
+}
+
+export interface LoginRequest {
+    username: string;
+    password?: string;
+}
+
+export interface SignupRequest {
+    username: string;
+    email: string;
+    password: string;
+    role: string;
+    firstName?: string;
+    lastName?: string;
+    // Vitals could be a separate call or added to DTO if backend supports it
+}
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
-    private readonly USER_KEY = 'mock_auth_user';
+    private readonly USER_KEY = 'auth_user';
+    // TODO: Use environment variable
+    private readonly API_URL = 'http://localhost:8080/api/auth';
+
+    private http = inject(HttpClient);
+    private router = inject(Router);
+
     currentUser = signal<User | null>(null);
 
-    constructor(
-        private router: Router
-    ) {
+    constructor() {
         this.restoreSession();
     }
 
@@ -20,80 +52,61 @@ export class AuthService {
         if (typeof localStorage !== 'undefined') {
             const stored = localStorage.getItem(this.USER_KEY);
             if (stored) {
-                const user = JSON.parse(stored);
-                this.currentUser.set(user);
+                try {
+                    const user = JSON.parse(stored);
+                    this.currentUser.set(user);
+                } catch (e) {
+                    console.error('Error parsing stored user', e);
+                    this.logout();
+                }
             }
         }
     }
 
-    // MOCK USERS DATABASE
-    private MOCK_USERS: (User & { password: string })[] = [
-        {
-            id: 1,
-            username: 'admin',
-            password: '123',
-            role: Role.Admin,
-            firstName: 'Super',
-            lastName: 'Admin',
-            permissions: ['add_dietitian', 'manage_dietitians']
-        },
-        {
-            id: 2,
-            username: 'frontdesk',
-            password: '123',
-            role: Role.Frontdesk,
-            firstName: 'Front',
-            lastName: 'Desk',
-            permissions: ['register_patient']
-        },
-        {
-            id: 3,
-            username: 'dietitian',
-            password: '123',
-            role: Role.Dietitian,
-            firstName: 'Sarah',
-            lastName: 'Dietitian',
-            permissions: ['view_patients', 'schedule_appointment', 'add_diet_plan']
-        },
-        {
-            id: 4,
-            username: 'patient',
-            password: '123',
+    login(credentials: LoginRequest): Observable<User> {
+        return this.http.post<JwtResponse>(`${this.API_URL}/login`, credentials).pipe(
+            map(response => {
+                // Map Backend JWT Response to Frontend User Model
+                const user: User = {
+                    id: response.id,
+                    username: response.username,
+                    // Handle role parsing (Backend sends List<String>, Frontend expects Role enum)
+                    role: this.mapBackendRoleToEnum(response.roles),
+                    firstName: response.username, // logical fallback as backend Login response might not have full details yet
+                    lastName: '',
+                    email: response.email,
+                    token: response.token,
+                    permissions: [] // Permissions logic can be expanded
+                };
+
+                this.saveUser(user);
+                return user;
+            })
+        );
+    }
+
+    register(userData: SignupRequest): Observable<any> {
+        return this.http.post(`${this.API_URL}/register`, userData);
+    }
+
+    // Helper for Patient Registration (matches registration component usage)
+    registerPatient(userModel: User, password: string): Observable<any> {
+        const signupRequest: SignupRequest = {
+            username: userModel.username,
+            email: userModel.email || '', // Ensure email is present
+            password: password,
             role: Role.Patient,
-            firstName: 'John',
-            lastName: 'Doe',
-            permissions: ['view_doctors', 'view_diet_plan']
-        }
-    ];
-
-    // MOCK LOGIN
-    login(username: string, password?: string): boolean {
-        const foundUser = this.MOCK_USERS.find(u => u.username === username && u.password === (password || '123'));
-
-        if (foundUser) {
-            // Simulating a JWT Token
-            const mockToken = `mock-jwt-token-${Math.random().toString(36).substring(7)}`;
-
-            const user: User = {
-                id: foundUser.id,
-                username: foundUser.username,
-                role: foundUser.role,
-                firstName: foundUser.firstName,
-                lastName: foundUser.lastName,
-                permissions: foundUser.permissions,
-                token: mockToken
-            };
-
-            localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-            this.currentUser.set(user);
-            return true;
-        }
-
-        return false;
+        };
+        // Note: detailed medical info (vitals, address) might need a separate endpoint 
+        // or the backend SignupRequest needs to be updated. 
+        // For now we register the user account.
+        return this.register(signupRequest);
     }
 
     logout() {
-        localStorage.removeItem(this.USER_KEY);
+        if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem(this.USER_KEY);
+        }
         this.currentUser.set(null);
         this.router.navigate(['/auth/login']);
     }
@@ -106,41 +119,88 @@ export class AuthService {
         return this.currentUser()?.role;
     }
 
-    registerPatient(user: User, password: string): boolean {
-        // Generate a new ID
-        const newId = Math.max(...this.MOCK_USERS.map(u => u.id)) + 1;
-
-        const newUser: User & { password: string } = {
-            ...user,
-            id: newId,
-            password: password,
-            role: Role.Patient,
-            permissions: ['view_doctors', 'view_diet_plan']
-        };
-
-        this.MOCK_USERS.push(newUser);
-        return true;
+    getToken(): string | undefined {
+        return this.currentUser()?.token;
     }
 
-    registerDietitian(user: Partial<User>, password: string): User {
-        const newId = Math.max(...this.MOCK_USERS.map(u => u.id)) + 1;
+    private saveUser(user: User) {
+        this.currentUser.set(user);
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+        }
+    }
 
-        const newUser: User & { password: string } = {
-            id: newId,
-            username: user.username!,
-            password: password,
+    // TEMPORARY: Keep mock for other components until they are connected to backend
+    private MOCK_USERS: User[] = [
+        {
+            id: 1,
+            username: 'admin',
+            role: Role.Admin,
+            firstName: 'Super',
+            lastName: 'Admin',
+            permissions: ['add_dietitian', 'manage_dietitians'],
+            email: 'admin@test.com',
+            token: ''
+        },
+        {
+            id: 2,
+            username: 'frontdesk',
+            role: Role.Frontdesk,
+            firstName: 'Front',
+            lastName: 'Desk',
+            permissions: ['register_patient'],
+            email: 'frontdesk@test.com',
+            token: ''
+        },
+        {
+            id: 3,
+            username: 'dietitian',
             role: Role.Dietitian,
-            firstName: user.firstName!,
-            lastName: user.lastName!,
+            firstName: 'Sarah',
+            lastName: 'Dietitian',
             permissions: ['view_patients', 'schedule_appointment', 'add_diet_plan'],
-            token: '' // No token on registration
-        };
-
-        this.MOCK_USERS.push(newUser);
-        return newUser;
-    }
+            email: 'dietitian@test.com',
+            token: ''
+        },
+        {
+            id: 4,
+            username: 'patient',
+            role: Role.Patient,
+            firstName: 'John',
+            lastName: 'Doe',
+            permissions: ['view_doctors', 'view_diet_plan'],
+            email: 'patient@test.com',
+            token: ''
+        }
+    ];
 
     getAllUsers(): User[] {
         return this.MOCK_USERS;
+    }
+
+    registerDietitian(user: Partial<User>, password: string): Observable<any> {
+        const signupRequest: SignupRequest = {
+            username: user.username!,
+            email: user.username + '@test.com', // Fallback email generation if not provided in UI
+            password: password,
+            role: 'ROLE_DIETITIAN',
+            firstName: user.firstName,
+            lastName: user.lastName
+        };
+        return this.register(signupRequest);
+    }
+
+    private mapBackendRoleToEnum(roles: string[]): Role {
+        if (!roles || roles.length === 0) return Role.Patient;
+
+        const roleStr = roles[0].replace('ROLE_', '').toUpperCase();
+
+        // Simple mapping logic
+        if (roleStr === 'ADMIN') return Role.Admin;
+        if (roleStr === 'DIETITIAN') return Role.Dietitian;
+        if (roleStr === 'FRONTDESK') return Role.Frontdesk;
+        if (roleStr === 'PATIENT') return Role.Patient;
+
+        return Role.Patient;
     }
 }

@@ -102,15 +102,29 @@ export class AddDietitianComponent {
     onSubmit() {
         if (this.dietitianForm.valid) {
             const val = this.dietitianForm.value;
-            this.appointmentService.addDietitian({
+            const result$ = this.appointmentService.addDietitian({
                 name: val.name,
                 speciality: 'Dietitian / Nutritionist',
                 username: val.username,
                 password: val.password
             });
 
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Dietitian added successfully' });
-            this.dietitianForm.reset();
+            if (result$) {
+                result$.subscribe({
+                    next: () => {
+                        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Dietitian added successfully' });
+                        this.dietitianForm.reset();
+                    },
+                    error: (err) => {
+                        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add Dietitian' });
+                        console.error(err);
+                    }
+                });
+            } else {
+                // Fallback likely unreachable
+                this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Operation completed locally' });
+                this.dietitianForm.reset();
+            }
         }
     }
 }

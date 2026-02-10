@@ -191,14 +191,17 @@ export class RegistrationComponent {
         }
       };
 
-      const success = this.authService.registerPatient(newUser, formVal.password);
-
-      if (success) {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient Registered Successfully' });
-        this.resetForm();
-      } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Registration failed' });
-      }
+      this.authService.registerPatient(newUser, formVal.password)
+        .subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient Registered Successfully' });
+            this.resetForm();
+          },
+          error: (err) => {
+            console.error('Registration failed', err);
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Registration failed' });
+          }
+        });
     } else {
       this.regForm.markAllAsTouched();
     }

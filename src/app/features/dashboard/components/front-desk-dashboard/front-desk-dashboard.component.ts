@@ -134,7 +134,7 @@ export class FrontDeskDashboardComponent implements OnInit {
         this.barChartData = charts.barChartData;
         this.barChartOptions = charts.barChartOptions;
 
-        this.patientOverview = patients.map(patient => {
+        this.patientOverview = patients.map((patient: any) => {
             // Find latest appointment
             const patientAppts = allAppointments.filter(a => a.patientId === patient.id);
             const latestAppt = patientAppts.length > 0 ? patientAppts[patientAppts.length - 1] : null;

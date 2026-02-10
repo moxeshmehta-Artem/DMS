@@ -3,6 +3,8 @@ import { Appointment } from '../models/appointment.model';
 import { AuthService } from '../auth/auth.service';
 import { inject } from '@angular/core';
 import { INITIAL_APPOINTMENTS, INITIAL_DIETITIANS } from '../constants/mock-data';
+import { tap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -21,28 +23,26 @@ export class AppointmentService {
 
     addDietitian(dietitian: { name: string, speciality: string, username?: string, password?: string }) {
         if (dietitian.username && dietitian.password) {
-            // Create User Account first
+            // Create User Account via API
             const nameParts = dietitian.name.split(' ');
-            const newUser = this.authService.registerDietitian({
+            return this.authService.registerDietitian({
                 firstName: nameParts[0],
                 lastName: nameParts.slice(1).join(' '),
                 username: dietitian.username
-            }, dietitian.password);
-
-            // Use the User ID for the Dietitian
-            this.MOCK_DIETITIANS.push({
-                id: newUser.id,
-                name: dietitian.name,
-                speciality: dietitian.speciality
-            });
+            }, dietitian.password).pipe(
+                tap(() => {
+                    // On success, add to local mock list for UI update (until full backend integration)
+                    this.MOCK_DIETITIANS.push({
+                        id: Math.floor(Math.random() * 1000) + 100, // Temp ID
+                        name: dietitian.name,
+                        speciality: dietitian.speciality
+                    });
+                })
+            );
         } else {
-            // Fallback for legacy (should not happen with new form)
-            const newId = Math.max(...this.MOCK_DIETITIANS.map(d => d.id)) + 1;
-            this.MOCK_DIETITIANS.push({
-                id: newId,
-                name: dietitian.name,
-                speciality: dietitian.speciality
-            });
+            // Fallback for legacy
+            // ... (keeping legacy logic if needed, but likely not reachable with new form)
+            return of(null);
         }
     }
 

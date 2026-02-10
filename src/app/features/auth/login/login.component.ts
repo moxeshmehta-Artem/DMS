@@ -75,16 +75,19 @@ export class LoginComponent {
     this.loginError = false;
     if (this.username && this.password) {
       this.isLoading = true;
-      // Simulate network delay
-      setTimeout(() => {
-        const success = this.authService.login(this.username, this.password);
-        if (success) {
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.loginError = true;
-        }
-        this.isLoading = false;
-      }, 1000);
+
+      this.authService.login({ username: this.username, password: this.password })
+        .subscribe({
+          next: () => {
+            this.router.navigate(['/dashboard']);
+            this.isLoading = false;
+          },
+          error: (err) => {
+            console.error('Login failed', err);
+            this.loginError = true;
+            this.isLoading = false;
+          }
+        });
     }
   }
 }
