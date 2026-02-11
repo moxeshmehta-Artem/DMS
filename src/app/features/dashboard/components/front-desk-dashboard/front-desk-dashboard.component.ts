@@ -79,70 +79,74 @@ export class FrontDeskDashboardComponent implements OnInit {
     }
 
     loadPatientOverview() {
-        const allUsers = this.authService.getAllUsers();
-        const patients = allUsers.filter(u => u.role === Role.Patient);
-        const allAppointments = this.appointmentService.getAllAppointments();
+        // Fetch Real Patients from Backend
+        this.authService.getAllPatients().subscribe({
+            next: (patients) => {
+                const allAppointments = this.appointmentService.getAllAppointments();
 
-        // Calculate Stats
-        const totalPatients = patients.length;
-        const totalAppointments = allAppointments.length;
-        const pendingAppointments = allAppointments.filter(a => a.status === 'Pending').length;
+                // Calculate Stats
+                const totalPatients = patients.length;
+                const totalAppointments = allAppointments.length;
+                const pendingAppointments = allAppointments.filter(a => a.status === 'Pending').length;
 
-        const today = new Date().toDateString();
-        const todaysAppointments = allAppointments.filter(a => new Date(a.date).toDateString() === today).length;
+                const today = new Date().toDateString();
+                const todaysAppointments = allAppointments.filter(a => new Date(a.date).toDateString() === today).length;
 
-        // Populate Data-Driven Stats Cards
-        this.statsCards = [
-            {
-                label: 'Total Patients',
-                value: totalPatients,
-                icon: 'pi pi-users',
-                color: 'blue',
-                subTextHighlight: 'Registered',
-                subText: 'in system'
+                // Populate Data-Driven Stats Cards
+                this.statsCards = [
+                    {
+                        label: 'Total Patients',
+                        value: totalPatients,
+                        icon: 'pi pi-users',
+                        color: 'blue',
+                        subTextHighlight: 'Registered',
+                        subText: 'in system'
+                    },
+                    {
+                        label: 'Appointments',
+                        value: totalAppointments,
+                        icon: 'pi pi-calendar',
+                        color: 'orange',
+                        subTextHighlight: 'All time',
+                        subText: 'records'
+                    },
+                    {
+                        label: 'Pending',
+                        value: pendingAppointments,
+                        icon: 'pi pi-clock',
+                        color: 'cyan',
+                        subTextHighlight: 'Action',
+                        subText: 'required'
+                    },
+                    {
+                        label: 'Today\'s',
+                        value: todaysAppointments,
+                        icon: 'pi pi-calendar-plus',
+                        color: 'purple',
+                        subTextHighlight: 'Scheduled',
+                        subText: 'for today'
+                    }
+                ];
+
+                // Prepare Chart Data
+                const charts = prepareChartData(allAppointments);
+                this.chartData = charts.chartData;
+                this.chartOptions = charts.chartOptions;
+                this.barChartData = charts.barChartData;
+                this.barChartOptions = charts.barChartOptions;
+
+                this.patientOverview = patients.map((patient: any) => {
+                    // Find latest appointment
+                    const patientAppts = allAppointments.filter(a => a.patientId === patient.id);
+                    const latestAppt = patientAppts.length > 0 ? patientAppts[patientAppts.length - 1] : null;
+
+                    return {
+                        ...patient,
+                        latestAppointment: latestAppt
+                    };
+                });
             },
-            {
-                label: 'Appointments',
-                value: totalAppointments,
-                icon: 'pi pi-calendar',
-                color: 'orange',
-                subTextHighlight: 'All time',
-                subText: 'records'
-            },
-            {
-                label: 'Pending',
-                value: pendingAppointments,
-                icon: 'pi pi-clock',
-                color: 'cyan',
-                subTextHighlight: 'Action',
-                subText: 'required'
-            },
-            {
-                label: 'Today\'s',
-                value: todaysAppointments,
-                icon: 'pi pi-calendar-plus',
-                color: 'purple',
-                subTextHighlight: 'Scheduled',
-                subText: 'for today'
-            }
-        ];
-
-        // Prepare Chart Data
-        const charts = prepareChartData(allAppointments);
-        this.chartData = charts.chartData;
-        this.chartOptions = charts.chartOptions;
-        this.barChartData = charts.barChartData;
-        this.barChartOptions = charts.barChartOptions;
-
-        this.patientOverview = patients.map((patient: any) => {
-            // Find latest appointment
-            const patientAppts = allAppointments.filter(a => a.patientId === patient.id);
-            const latestAppt = patientAppts.length > 0 ? patientAppts[patientAppts.length - 1] : null;
-
-            return {
-                ...patient,
-                latestAppointment: latestAppt
-            };
+            error: (err) => console.error('Failed to load patients', err)
         });
     }
 

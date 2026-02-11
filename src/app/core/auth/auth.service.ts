@@ -177,6 +177,39 @@ export class AuthService {
         }
     ];
 
+    // Updated to fetch REAL users from backend
+    getUsers(): Observable<User[]> {
+        return this.http.get<any[]>(`${this.API_URL.replace('/auth', '/users')}`).pipe(
+            map(users => users.map(u => ({
+                id: u.id,
+                username: u.username,
+                role: this.mapBackendRoleToEnum([u.role || u.roles?.[0] || 'ROLE_PATIENT']), // Handle potential format differences
+                firstName: u.firstName,
+                lastName: u.lastName,
+                email: u.email,
+                token: '', // Not needed for list
+                permissions: []
+            })))
+        );
+    }
+
+    // Helper to get only patients
+    getAllPatients(): Observable<User[]> {
+        return this.http.get<any[]>(`${this.API_URL.replace('/auth', '/users/patients')}`).pipe(
+            map(users => users.map(u => ({
+                id: u.id,
+                username: u.username,
+                role: Role.Patient,
+                firstName: u.firstName,
+                lastName: u.lastName,
+                email: u.email,
+                token: '',
+                permissions: []
+            })))
+        );
+    }
+
+    // Legacy Mock - eventually remove
     getAllUsers(): User[] {
         return this.MOCK_USERS;
     }
