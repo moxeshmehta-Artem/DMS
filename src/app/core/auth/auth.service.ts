@@ -28,6 +28,7 @@ export interface SignupRequest {
     role: string;
     firstName?: string;
     lastName?: string;
+    gender?: string;
     // Vitals could be a separate call or added to DTO if backend supports it
 }
 
@@ -97,7 +98,8 @@ export class AuthService {
             password: password,
             role: 'ROLE_PATIENT',
             firstName: userModel.firstName,
-            lastName: userModel.lastName
+            lastName: userModel.lastName,
+            gender: userModel.gender
         };
         console.log('Registering Patient with payload:', signupRequest);
         // Note: detailed medical info (vitals, address) might need a separate endpoint 
@@ -186,6 +188,7 @@ export class AuthService {
                 role: this.mapBackendRoleToEnum([u.role || u.roles?.[0] || 'ROLE_PATIENT']), // Handle potential format differences
                 firstName: u.firstName,
                 lastName: u.lastName,
+                gender: u.gender,
                 email: u.email,
                 token: '', // Not needed for list
                 permissions: []
@@ -202,6 +205,7 @@ export class AuthService {
                 role: Role.Patient,
                 firstName: u.firstName,
                 lastName: u.lastName,
+                gender: u.gender,
                 email: u.email,
                 token: '',
                 permissions: []

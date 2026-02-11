@@ -11,10 +11,16 @@ import { StatusSeverityPipe } from '../../../../shared/pipes/status-severity.pip
     <div class="surface-card p-4 shadow-2 border-round mt-4">
         <div class="flex justify-content-between align-items-center mb-3">
             <div class="text-2xl font-medium text-900">Registered Patients</div>
-            <button pButton icon="pi pi-user-plus" label="Register New" (click)="onRegister.emit()" class="p-button-sm"></button>
+            <div class="flex gap-2">
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Search..." />
+                </span>
+                <button pButton icon="pi pi-user-plus" label="Register New" (click)="onRegister.emit()" class="p-button-sm"></button>
+            </div>
         </div>
         
-        <p-table [value]="patients" [paginator]="true" [rows]="5" responsiveLayout="stack" [breakpoint]="'960px'">
+        <p-table #dt [value]="patients" [paginator]="true" [rows]="5" responsiveLayout="stack" [breakpoint]="'960px'" [globalFilterFields]="['firstName','lastName','username','phone']">
             <ng-template pTemplate="header">
                 <tr>
                     <th pSortableColumn="firstName">Name <p-sortIcon field="firstName"></p-sortIcon></th>
