@@ -213,6 +213,23 @@ export class AuthService {
         );
     }
 
+    // Helper to get only dietitians
+    getDietitians(): Observable<User[]> {
+        return this.http.get<any[]>(`${this.API_URL.replace('/auth', '/users/dietitians')}`).pipe(
+            map(users => users.map(u => ({
+                id: u.id,
+                username: u.username,
+                role: Role.Dietitian,
+                firstName: u.firstName,
+                lastName: u.lastName,
+                gender: u.gender,
+                email: u.email,
+                token: '',
+                permissions: []
+            })))
+        );
+    }
+
     // Legacy Mock - eventually remove
     getAllUsers(): User[] {
         return this.MOCK_USERS;

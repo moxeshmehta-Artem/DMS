@@ -124,7 +124,15 @@ export class DoctorSelectionComponent implements OnInit {
   private messageService = inject(MessageService);
 
   ngOnInit() {
-    this.dietitians = this.appointmentService.getDietitians();
+    this.appointmentService.getDietitians().subscribe({
+      next: (data: any[]) => {
+        this.dietitians = data;
+      },
+      error: (err) => {
+        console.error('Failed to load dietitians', err);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load dietitians' });
+      }
+    });
   }
 
   openBooking(doctor: any) {

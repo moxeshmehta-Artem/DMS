@@ -75,7 +75,15 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     refreshList() {
-        this.dietitians = this.appointmentService.getDietitians();
+        this.appointmentService.getDietitians().subscribe({
+            next: (data: any[]) => {
+                this.dietitians = data;
+            },
+            error: (err: any) => {
+                console.error('Error fetching dietitians', err);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load dietitians' });
+            }
+        });
     }
 
     deleteDietitian(doc: any) {

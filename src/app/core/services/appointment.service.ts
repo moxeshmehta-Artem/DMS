@@ -3,7 +3,7 @@ import { Appointment } from '../models/appointment.model';
 import { AuthService } from '../auth/auth.service';
 import { inject } from '@angular/core';
 import { INITIAL_APPOINTMENTS, INITIAL_DIETITIANS } from '../constants/mock-data';
-import { tap } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 @Injectable({
@@ -18,7 +18,20 @@ export class AppointmentService {
     private MOCK_DIETITIANS: { id: number, name: string, speciality: string }[] = [...INITIAL_DIETITIANS];
 
     getDietitians() {
-        return this.MOCK_DIETITIANS;
+        return this.authService.getDietitians().pipe(
+            tap(dietitians => {
+                // Update mock list for hybrid approach if needed, or just rely on API
+                // We map backend users to the format expected by UI if different
+                // UI expects: { id, name, speciality }
+                // Backend returns User object. We need to map it.
+            }),
+            map(users => users.map(u => ({
+                id: u.id,
+                name: (u.firstName + ' ' + u.lastName).trim() || u.username,
+                speciality: 'Certified Dietitian', // Backend doesn't have speciality yet, default it
+                username: u.username
+            })))
+        );
     }
 
     addDietitian(dietitian: { name: string, speciality: string, username?: string, password?: string }) {
