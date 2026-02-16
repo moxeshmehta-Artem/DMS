@@ -1,10 +1,11 @@
 export function prepareChartData(appointments: any[]) {
     // Doughnut Chart: Status Distribution
-    const statuses = ['Confirmed', 'Pending', 'Completed', 'Rejected'];
+    const statuses = ['CONFIRMED', 'PENDING', 'COMPLETED', 'REJECTED'];
+    const displayLabels = ['Confirmed', 'Pending', 'Completed', 'Rejected'];
     const statusCounts = statuses.map(status => appointments.filter(a => a.status === status).length);
 
     const chartData = {
-        labels: statuses,
+        labels: displayLabels,
         datasets: [
             {
                 data: statusCounts,
@@ -28,7 +29,6 @@ export function prepareChartData(appointments: any[]) {
     };
 
     // Bar Chart: Upcoming vs Past (Simple week view)
-    // For simplicity, let's show appointments per day for the next 5 days
     const labels = [];
     const data = [];
     const today = new Date();
@@ -38,7 +38,8 @@ export function prepareChartData(appointments: any[]) {
         date.setDate(today.getDate() + i);
         labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
 
-        const count = appointments.filter(a => new Date(a.date).toDateString() === date.toDateString()).length;
+        const dateStr = date.toISOString().split('T')[0];
+        const count = appointments.filter(a => a.appointmentDate === dateStr).length;
         data.push(count);
     }
 
@@ -51,7 +52,7 @@ export function prepareChartData(appointments: any[]) {
                 backgroundColor: '#6366f1',
                 borderColor: '#4f46e5',
                 borderWidth: 1,
-                barThickness: 40 // Fixed thickness
+                barThickness: 40
             }
         ]
     };
@@ -69,7 +70,6 @@ export function prepareChartData(appointments: any[]) {
         scales: {
             y: {
                 beginAtZero: true,
-
                 ticks: {
                     color: '#495057',
                     stepSize: 5

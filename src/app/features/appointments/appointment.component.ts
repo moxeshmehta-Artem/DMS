@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { Appointment } from '../../core/models/appointment.model';
+import { Appointment, AppointmentStatus } from '../../core/models/appointment.model';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -53,22 +53,22 @@ import { User } from '../../core/models/user.model';
                         <td>
                             <span class="text-primary cursor-pointer hover:underline font-bold" (click)="viewPatient(appt.patientId)">{{ appt.patientName }}</span>
                         </td>
-                        <td>{{ appt.date | date:'mediumDate' }}</td>
+                        <td>{{ appt.appointmentDate | date:'mediumDate' }}</td>
                         <td>{{ appt.timeSlot }}</td>
                         <td>{{ appt.description }}</td>
                         <td>
                             <p-tag [value]="appt.status" [severity]="getSeverity(appt.status)"></p-tag>
                         </td>
                         <td>
-                            <div class="flex gap-2" *ngIf="appt.status === 'Pending'">
-                                <p-button icon="pi pi-check" severity="success" [rounded]="true" [text]="true" pTooltip="Accept" (onClick)="updateStatus(appt, 'Confirmed')"></p-button>
-                                <p-button icon="pi pi-times" severity="danger" [rounded]="true" [text]="true" pTooltip="Reject" (onClick)="updateStatus(appt, 'Rejected')"></p-button>
+                            <div class="flex gap-2" *ngIf="appt.status === 'PENDING'">
+                                <p-button icon="pi pi-check" severity="success" [rounded]="true" [text]="true" pTooltip="Accept" (onClick)="updateStatus(appt, 'CONFIRMED')"></p-button>
+                                <p-button icon="pi pi-times" severity="danger" [rounded]="true" [text]="true" pTooltip="Reject" (onClick)="updateStatus(appt, 'REJECTED')"></p-button>
                             </div>
-                            <div class="flex gap-2" *ngIf="appt.status === 'Confirmed'">
+                            <div class="flex gap-2" *ngIf="appt.status === 'CONFIRMED'">
                                 <p-button label="Create Plan" icon="pi pi-book" severity="info" [rounded]="true" [outlined]="true" pTooltip="Create Diet Plan" (onClick)="openDietPlan(appt)"></p-button>
-                                <p-button label="Complete" icon="pi pi-check-circle" severity="help" [rounded]="true" [outlined]="true" pTooltip="Mark as Completed" (onClick)="updateStatus(appt, 'Completed')"></p-button>
+                                <p-button label="Complete" icon="pi pi-check-circle" severity="help" [rounded]="true" [outlined]="true" pTooltip="Mark as Completed" (onClick)="updateStatus(appt, 'COMPLETED')"></p-button>
                             </div>
-                            <span *ngIf="appt.status === 'Rejected' || appt.status === 'Completed'" class="text-500 font-italic">No actions</span>
+                            <span *ngIf="appt.status === 'REJECTED' || appt.status === 'COMPLETED' || appt.status === 'CANCELLED'" class="text-500 font-italic">No actions</span>
                         </td>
                     </tr>
                 </ng-template>
@@ -142,7 +142,7 @@ import { User } from '../../core/models/user.model';
             </div>
         </p-dialog>
     </div>
-    `
+  `
 })
 export class AppointmentComponent implements OnInit {
   appointments: Appointment[] = [];
@@ -166,24 +166,23 @@ export class AppointmentComponent implements OnInit {
   }
 
   loadAppointments() {
-    // In a real app, use the logged in Dietitian's ID
-    // For this demo, we can just show all appointments filtered by "dietitian" mock ID (which is 3 in AuthService)
-    // Or better yet, check the current user's ID
     const currentUser = this.authService.currentUser();
     if (currentUser) {
-      this.appointments = this.appointmentService.getAppointmentsForDietitian(currentUser.id);
-      // If empty (e.g. testing with a new user), maybe show a mock one for demo if they are a dietitian
-      if (this.appointments.length === 0 && currentUser.role === 'Dietitian') {
-        // Optional: Auto-generate one for visualization?
-        // this.appointments = this.appointmentService.getAppointmentsForDietitian(3); 
-      }
+      this.appointmentService.getAppointmentsForDietitian(currentUser.id).subscribe({
+        next: (data) => {
+          this.appointments = data;
+        },
+        error: (err) => {
+          console.error('Failed to load appointments', err);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load appointments' });
+        }
+      });
     }
   }
 
   // DIET PLAN
   openDietPlan(appt: Appointment) {
     this.selectedAppt = appt;
-    // Reset form
     this.newPlan = { breakfast: '', lunch: '', dinner: '', snacks: '' };
     this.displayDietPlanDialog = true;
   }
@@ -195,8 +194,8 @@ export class AppointmentComponent implements OnInit {
   saveDietPlan() {
     if (this.selectedAppt && this.isPlanValid) {
       this.patientService.saveDietPlan(this.selectedAppt.patientId, this.newPlan);
-      this.updateStatus(this.selectedAppt, 'Completed');
-      this.messageService.add({ severity: 'success', summary: 'Plan Saved', detail: 'Diet plan created and appointment completed' });
+      this.updateStatus(this.selectedAppt, 'COMPLETED');
+      //   this.messageService.add({ severity: 'success', summary: 'Plan Saved', detail: 'Diet plan created and appointment completed' });
       this.displayDietPlanDialog = false;
     } else {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Please fill in Breakfast, Lunch, and Dinner details' });
@@ -212,22 +211,30 @@ export class AppointmentComponent implements OnInit {
     }
   }
 
-  updateStatus(appt: Appointment, status: 'Confirmed' | 'Rejected' | 'Completed') {
-    this.appointmentService.updateStatus(appt.id, status);
-    appt.status = status; // Optimistic update
-    this.messageService.add({
-      severity: status === 'Confirmed' ? 'success' : 'warn',
-      summary: status,
-      detail: `Appointment has been ${status.toLowerCase()}.`
+  updateStatus(appt: Appointment, status: AppointmentStatus) {
+    this.appointmentService.updateStatus(appt.id, status).subscribe({
+      next: (updated) => {
+        appt.status = updated.status;
+        this.messageService.add({
+          severity: status === 'CONFIRMED' ? 'success' : 'warn',
+          summary: status,
+          detail: `Appointment has been ${status.toLowerCase()}.`
+        });
+      },
+      error: (err) => {
+        console.error('Update status failed', err);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update appointment status' });
+      }
     });
   }
 
   getSeverity(status: string): 'success' | 'warning' | 'danger' | 'info' | undefined {
     switch (status) {
-      case 'Confirmed': return 'success';
-      case 'Pending': return 'warning';
-      case 'Rejected': return 'danger';
-      case 'Completed': return 'info';
+      case 'CONFIRMED': return 'success';
+      case 'PENDING': return 'warning';
+      case 'REJECTED': return 'danger';
+      case 'COMPLETED': return 'info';
+      case 'CANCELLED': return 'danger';
       default: return undefined;
     }
   }

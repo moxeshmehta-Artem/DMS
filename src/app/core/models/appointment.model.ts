@@ -1,12 +1,22 @@
+export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'COMPLETED' | 'CANCELLED';
+
 export interface Appointment {
     id: number;
     patientId: number;
     patientName: string;
-    dietitianId: number;
-    dietitianName: string;
+    providerId: number;
+    providerName: string;
     description: string;
-    date: Date;
+    appointmentDate: string; // ISO format from backend
     timeSlot: string; // e.g. "10:00 AM"
-    status: 'Pending' | 'Confirmed' | 'Rejected' | 'Completed';
+    status: AppointmentStatus;
     notes?: string;
+}
+
+export interface AppointmentRequest {
+    patientId: number;
+    providerId: number;
+    appointmentDate: string; // yyyy-MM-dd
+    timeSlot: string;
+    description: string;
 }

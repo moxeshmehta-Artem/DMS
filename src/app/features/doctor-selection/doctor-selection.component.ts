@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -12,7 +12,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ToastModule } from 'primeng/toast';
-import { TableModule } from 'primeng/table'; // Added
+import { TableModule } from 'primeng/table';
 import { MessageService } from 'primeng/api';
 
 @Component({
@@ -28,7 +28,8 @@ import { MessageService } from 'primeng/api';
     DropdownModule,
     InputTextareaModule,
     ToastModule,
-    TableModule // Added
+    TableModule,
+    DatePipe
   ],
   providers: [MessageService],
   template: `
@@ -79,7 +80,7 @@ import { MessageService } from 'primeng/api';
                         </ng-template>
                         <ng-template pTemplate="body" let-appt>
                             <tr>
-                                <td>{{ appt.date | date:'shortDate' }}</td>
+                                <td>{{ appt.appointmentDate | date:'shortDate' }}</td>
                                 <td>{{ appt.timeSlot }}</td>
                                 <td><span class="text-red-500 font-bold">Busy</span></td>
                             </tr>
@@ -103,7 +104,7 @@ import { MessageService } from 'primeng/api';
             </ng-template>
         </p-dialog>
     </div>
-    `
+  `
 })
 export class DoctorSelectionComponent implements OnInit {
   dietitians: any[] = [];
@@ -140,37 +141,46 @@ export class DoctorSelectionComponent implements OnInit {
     this.bookingDate = undefined;
     this.bookingTime = undefined;
     this.description = '';
+    this.bookedAppointments = [];
 
     this.loadDoctorSchedule(doctor.id);
-    this.availableTimeSlots = []; // Reset until date selected
+    this.availableTimeSlots = [];
 
     this.displayBookingDialog = true;
   }
 
   loadDoctorSchedule(doctorId: number) {
-    // Fetch all active appointments for this doctor to display in the chart
-    const allAppts = this.appointmentService.getAppointmentsForDietitian(doctorId);
-    this.bookedAppointments = allAppts.filter(a => a.status === 'Confirmed');
+    this.appointmentService.getAppointmentsForDietitian(doctorId).subscribe({
+      next: (allAppts) => {
+        this.bookedAppointments = allAppts.filter(a => a.status === 'CONFIRMED' || a.status === 'PENDING');
+        this.updateAvailableSlots();
+      }
+    });
   }
 
   updateAvailableSlots() {
     if (!this.bookingDate || !this.selectedDietitian) return;
 
-    const selectedDateStr = this.bookingDate.toDateString();
+    const selectedDateStr = this.formatDate(this.bookingDate);
 
-    // Filter out slots that are already booked for the selected date
     this.availableTimeSlots = this.allTimeSlots.filter(slot => {
       const isBooked = this.bookedAppointments.some(appt =>
-        new Date(appt.date).toDateString() === selectedDateStr &&
+        appt.appointmentDate === selectedDateStr &&
         appt.timeSlot === slot
       );
       return !isBooked;
     });
 
-    // Reset selected time if it's no longer available
     if (this.bookingTime && !this.availableTimeSlots.includes(this.bookingTime)) {
       this.bookingTime = undefined;
     }
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   confirmBooking() {
@@ -178,31 +188,23 @@ export class DoctorSelectionComponent implements OnInit {
       const currentUser = this.authService.currentUser();
       if (!currentUser) return;
 
-      if (this.appointmentService.hasActiveAppointment(currentUser.id)) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Restriction',
-          detail: 'You already have an active appointment. Please complete it before booking another.'
-        });
-        return;
-      }
+      const dateStr = this.formatDate(this.bookingDate);
 
-      const success = this.appointmentService.bookAppointment({
+      this.appointmentService.bookAppointment({
         patientId: currentUser.id,
-        patientName: (currentUser.firstName || '') + ' ' + (currentUser.lastName || ''),
-        dietitianId: this.selectedDietitian.id,
-        dietitianName: this.selectedDietitian.name,
-        date: this.bookingDate,
+        providerId: this.selectedDietitian.id,
+        appointmentDate: dateStr,
         timeSlot: this.bookingTime,
         description: this.description || 'Consultation'
+      }).subscribe({
+        next: (res) => {
+          this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Appointment Request Sent!' });
+          this.displayBookingDialog = false;
+        },
+        error: (err) => {
+          this.messageService.add({ severity: 'error', summary: 'Booking Failed', detail: err.error?.message || 'Failed to book appointment' });
+        }
       });
-
-      if (success) {
-        this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Appointment Request Sent!' });
-        this.displayBookingDialog = false;
-      } else {
-        this.messageService.add({ severity: 'error', summary: 'Slot Unavailable', detail: 'This time slot is already booked. Please choose another.' });
-      }
     }
   }
 }

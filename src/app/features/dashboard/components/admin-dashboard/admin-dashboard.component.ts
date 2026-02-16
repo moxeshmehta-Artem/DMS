@@ -88,9 +88,15 @@ export class AdminDashboardComponent implements OnInit {
 
     deleteDietitian(doc: any) {
         if (confirm(`Are you sure you want to remove ${doc.name}?`)) {
-            this.appointmentService.removeDietitian(doc.id);
-            this.messageService.add({ severity: 'success', summary: 'Removed', detail: 'Dietitian removed successfully' });
-            this.refreshList();
+            this.appointmentService.removeDietitian(doc.id).subscribe({
+                next: () => {
+                    this.messageService.add({ severity: 'success', summary: 'Removed', detail: 'Dietitian removed successfully' });
+                    this.refreshList();
+                },
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to remove dietitian' });
+                }
+            });
         }
     }
 }

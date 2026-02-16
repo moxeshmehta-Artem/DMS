@@ -1,15 +1,17 @@
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { PatientService } from '../../core/services/patient.service';
 import { MessageService, MenuItem } from 'primeng/api';
 import { SharedUiModule } from '../../shared/modules/shared-ui.module';
+import { Appointment } from '../../core/models/appointment.model';
 
 @Component({
   selector: 'app-patient-list',
   standalone: true,
   imports: [
+    CommonModule,
     SharedUiModule,
     DatePipe
   ],
@@ -113,33 +115,38 @@ export class PatientListComponent implements OnInit {
     const currentUser = this.authService.currentUser();
     if (!currentUser) return;
 
-    const myAppts = this.appointmentService.getAppointmentsForDietitian(currentUser.id);
+    this.appointmentService.getAppointmentsForDietitian(currentUser.id).subscribe({
+      next: (myAppts) => {
+        const uniquePatientsMap = new Map();
 
-    const uniquePatientsMap = new Map();
+        myAppts.forEach((appt: Appointment) => {
+          if (!uniquePatientsMap.has(appt.patientId)) {
+            uniquePatientsMap.set(appt.patientId, {
+              id: appt.patientId,
+              name: appt.patientName,
+              lastVisit: appt.appointmentDate,
+              status: appt.status,
+              latestApptId: appt.id,
+              totalAppts: 0
+            });
+          }
 
-    myAppts.forEach(appt => {
-      if (!uniquePatientsMap.has(appt.patientId)) {
-        uniquePatientsMap.set(appt.patientId, {
-          id: appt.patientId,
-          name: appt.patientName,
-          lastVisit: appt.date,
-          status: appt.status,
-          latestApptId: appt.id,
-          totalAppts: 0
+          const existing = uniquePatientsMap.get(appt.patientId);
+          existing.totalAppts++;
+
+          if (new Date(appt.appointmentDate) > new Date(existing.lastVisit)) {
+            existing.lastVisit = appt.appointmentDate;
+            existing.status = appt.status;
+            existing.latestApptId = appt.id;
+          }
         });
-      }
 
-      const existing = uniquePatientsMap.get(appt.patientId);
-      existing.totalAppts++;
-
-      if (new Date(appt.date) > new Date(existing.lastVisit)) {
-        existing.lastVisit = appt.date;
-        existing.status = appt.status;
-        existing.latestApptId = appt.id;
+        this.patients = Array.from(uniquePatientsMap.values());
+      },
+      error: (err) => {
+        console.error('Failed to load patient appointments', err);
       }
     });
-
-    this.patients = Array.from(uniquePatientsMap.values());
   }
 
   @ViewChild('menu') menu!: any; // Access the menu component
@@ -158,7 +165,7 @@ export class PatientListComponent implements OnInit {
           {
             label: 'Mark Consultation Complete',
             icon: 'pi pi-check-circle',
-            visible: patient.status === 'Confirmed',
+            visible: patient.status === 'CONFIRMED',
             command: () => this.completeConsultation(patient)
           },
           {
@@ -173,6 +180,7 @@ export class PatientListComponent implements OnInit {
   }
 
   viewPatientDetails(patient: any) {
+    // Currently using the cached users, eventually fetch from backend if needed
     const user = this.authService.getAllUsers().find(u => u.id === patient.id);
     if (user) {
       this.selectedPatientDetails = user;
@@ -182,11 +190,15 @@ export class PatientListComponent implements OnInit {
 
   completeConsultation(patient: any) {
     if (patient.latestApptId) {
-      this.appointmentService.updateStatus(patient.latestApptId, 'Completed');
-      // Update local state
-      patient.status = 'Completed';
-      this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Consultation marked as complete' });
+      this.appointmentService.updateStatus(patient.latestApptId, 'COMPLETED').subscribe({
+        next: () => {
+          patient.status = 'COMPLETED';
+          this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Consultation marked as complete' });
+        },
+        error: (err) => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update consultation status' });
+        }
+      });
     }
   }
-
 }
