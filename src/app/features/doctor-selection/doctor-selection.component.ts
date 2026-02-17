@@ -205,7 +205,7 @@ export class DoctorSelectionComponent implements OnInit {
             this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Appointment Request Sent!' });
             this.displayBookingDialog = false;
           } else {
-            this.messageService.add({ severity: 'error', summary: 'Unavailable', detail: res.message || 'Slot is already taken' });
+            this.messageService.add({ severity: 'info', summary: 'Unavailable', detail: res.message || 'Slot is already taken' });
           }
           this.isLoading = false;
         },
