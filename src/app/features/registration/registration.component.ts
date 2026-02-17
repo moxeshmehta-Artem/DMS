@@ -17,7 +17,7 @@ import { MessageService } from 'primeng/api';
   template: `
     <div class="flex justify-content-center p-4">
         <p-toast></p-toast>
-        <p-card header="Patient Registration" subheader="Register new patient and record vitals" [style]="{ width: '100%', maxWidth: '800px' }">
+        <p-card header="Patient Registration" subheader="Register new patient" [style]="{ width: '100%', maxWidth: '800px' }">
             <form [formGroup]="regForm" (ngSubmit)="onSubmit()" class="flex flex-column gap-3">
                 
                 <!-- PERSONAL DETAILS -->
@@ -86,41 +86,6 @@ import { MessageService } from 'primeng/api';
                 </div>
 
                 <p-divider></p-divider>
-                
-                <!-- VITALS -->
-                <h3 class="m-0 text-primary">Initial Vitals</h3>
-                <div class="grid p-fluid" formGroupName="vitals">
-                    <div class="col-6 md:col-3">
-                        <label class="block mb-2 font-bold">Height (cm)</label>
-                        <p-inputNumber formControlName="height" suffix=" cm" [min]="0"></p-inputNumber>
-                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.height')?.invalid && regForm.get('vitals.height')?.touched">Height is required (0-300)</small>
-                    </div>
-                    <div class="col-6 md:col-3">
-                        <label class="block mb-2 font-bold">Weight (kg)</label>
-                        <p-inputNumber formControlName="weight" suffix=" kg" [min]="0" [maxFractionDigits]="1"></p-inputNumber>
-                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.weight')?.invalid && regForm.get('vitals.weight')?.touched">Weight is required (0-500)</small>
-                    </div>
-                    <div class="col-6 md:col-3">
-                        <label class="block mb-2 font-bold">BP (Systolic)</label>
-                        <p-inputNumber formControlName="bloodPressureSys" suffix=" mmHg" [min]="0"></p-inputNumber>
-                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.bloodPressureSys')?.invalid && regForm.get('vitals.bloodPressureSys')?.touched">Range: 0-300</small>
-                    </div>
-                    <div class="col-6 md:col-3">
-                        <label class="block mb-2 font-bold">BP (Diastolic)</label>
-                        <p-inputNumber formControlName="bloodPressureDia" suffix=" mmHg" [min]="0"></p-inputNumber>
-                         <small class="text-red-500 block" *ngIf="regForm.get('vitals.bloodPressureDia')?.invalid && regForm.get('vitals.bloodPressureDia')?.touched">Range: 0-300</small>
-                    </div>
-                    <div class="col-6 md:col-3">
-                        <label class="block mb-2 font-bold">Heart Rate</label>
-                        <p-inputNumber formControlName="heartRate" suffix=" bpm" [min]="0"></p-inputNumber>
-                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.heartRate')?.invalid && regForm.get('vitals.heartRate')?.touched">Range: 0-300</small>
-                    </div>
-                    <div class="col-6 md:col-3">
-                        <label class="block mb-2 font-bold">Body Temp (°C)</label>
-                        <p-inputNumber formControlName="temperature" suffix=" °C" [min]="0" [maxFractionDigits]="1"></p-inputNumber>
-                        <small class="text-red-500 block" *ngIf="regForm.get('vitals.temperature')?.invalid && regForm.get('vitals.temperature')?.touched">Range: 30-45</small>
-                    </div>
-                </div>
 
                 <div class="flex justify-content-end mt-4 gap-2">
                     <p-button label="Reset" icon="pi pi-refresh" styleClass="p-button-secondary" (onClick)="resetForm()"></p-button>
@@ -149,15 +114,7 @@ export class RegistrationComponent {
     address: ['', Validators.required],
     username: ['', Validators.required],
     password: ['', Validators.required],
-    confirmPassword: ['', Validators.required],
-    vitals: this.fb.group({
-      height: [null, [Validators.required, Validators.min(0), Validators.max(300)]],
-      weight: [null, [Validators.required, Validators.min(0), Validators.max(500)]],
-      bloodPressureSys: [null, [Validators.min(0), Validators.max(300)]],
-      bloodPressureDia: [null, [Validators.min(0), Validators.max(300)]],
-      heartRate: [null, [Validators.min(0), Validators.max(300)]],
-      temperature: [null, [Validators.min(30), Validators.max(45)]]
-    })
+    confirmPassword: ['', Validators.required]
   }, { validators: passwordMatchValidator });
 
   isInvalid(controlName: string): boolean {
@@ -180,15 +137,7 @@ export class RegistrationComponent {
         phone: formVal.phone,
         dob: formVal.dob,
         gender: formVal.gender,
-        address: formVal.address,
-        vitals: {
-          height: formVal.vitals.height,
-          weight: formVal.vitals.weight,
-          bloodPressureSys: formVal.vitals.bloodPressureSys,
-          bloodPressureDia: formVal.vitals.bloodPressureDia,
-          heartRate: formVal.vitals.heartRate,
-          temperature: formVal.vitals.temperature
-        }
+        address: formVal.address
       };
 
       this.authService.registerPatient(newUser, formVal.password)

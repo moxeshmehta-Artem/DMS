@@ -30,6 +30,7 @@ import { StatusSeverityPipe } from '../../../../shared/pipes/status-severity.pip
                     <th>Vitals (Latest)</th>
                     <th>Latest Appointment</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-patient>
@@ -43,7 +44,7 @@ import { StatusSeverityPipe } from '../../../../shared/pipes/status-severity.pip
                     </td>
                     <td>
                         <span class="p-column-title font-bold mr-2">Age</span>
-                        {{ getAge(patient.dob) }} yrs
+                        {{ patient.age || 0 }} yrs
                     </td>
                     <td>
                         <span class="p-column-title font-bold mr-2">Gender</span>
@@ -75,6 +76,19 @@ import { StatusSeverityPipe } from '../../../../shared/pipes/status-severity.pip
                             <p-tag *ngIf="patient.latestAppointment" [severity]="patient.latestAppointment.status | statusSeverity" [value]="patient.latestAppointment.status"></p-tag>
                             </div>
                     </td>
+                    <td>
+                        <span class="p-column-title font-bold mr-2">Actions</span>
+                        <div class="flex gap-2">
+                            <button *ngIf="!patient.vitals" pButton icon="pi pi-plus-circle" label="Add Vitals" 
+                                (click)="onAddVitals.emit(patient.id)" 
+                                class="p-button-sm p-button-outlined p-button-success">
+                            </button>
+                            <button *ngIf="patient.vitals" pButton icon="pi pi-pencil" label="Edit Vitals" 
+                                (click)="onAddVitals.emit(patient.id)" 
+                                class="p-button-sm p-button-outlined p-button-warning">
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             </ng-template>
             <ng-template pTemplate="emptymessage">
@@ -89,6 +103,7 @@ import { StatusSeverityPipe } from '../../../../shared/pipes/status-severity.pip
 export class RegisteredPatientsComponent {
     @Input() patients: any[] = [];
     @Output() onRegister = new EventEmitter<void>();
+    @Output() onAddVitals = new EventEmitter<number>();
 
     getAge(dob: any): number {
         if (!dob) return 0;

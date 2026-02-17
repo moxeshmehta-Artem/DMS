@@ -13,6 +13,7 @@ export interface User {
     email?: string;
     phone?: string;
     dob?: Date;
+    age?: number;
     gender?: 'Male' | 'Female' | 'Other';
     address?: string;
     vitals?: {

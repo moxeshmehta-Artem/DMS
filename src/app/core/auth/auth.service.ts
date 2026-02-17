@@ -29,6 +29,7 @@ export interface SignupRequest {
     firstName?: string;
     lastName?: string;
     gender?: string;
+    dateOfBirth?: string;
     // Vitals could be a separate call or added to DTO if backend supports it
 }
 
@@ -99,7 +100,8 @@ export class AuthService {
             role: 'ROLE_PATIENT',
             firstName: userModel.firstName,
             lastName: userModel.lastName,
-            gender: userModel.gender
+            gender: userModel.gender,
+            dateOfBirth: userModel.dob ? (userModel.dob instanceof Date ? userModel.dob.toISOString().split('T')[0] : userModel.dob) : undefined
         };
         console.log('Registering Patient with payload:', signupRequest);
         // Note: detailed medical info (vitals, address) might need a separate endpoint 
@@ -190,6 +192,7 @@ export class AuthService {
                 lastName: u.lastName,
                 gender: u.gender,
                 email: u.email,
+                age: u.age,
                 token: '', // Not needed for list
                 permissions: []
             })))
@@ -207,6 +210,7 @@ export class AuthService {
                 lastName: u.lastName,
                 gender: u.gender,
                 email: u.email,
+                age: u.age,
                 token: '',
                 permissions: []
             })))

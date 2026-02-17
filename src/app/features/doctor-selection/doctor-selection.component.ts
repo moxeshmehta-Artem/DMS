@@ -100,7 +100,7 @@ import { MessageService } from 'primeng/api';
                 </div>
             </div>
             <ng-template pTemplate="footer">
-                <p-button label="Confirm Booking" icon="pi pi-check" (onClick)="confirmBooking()" [disabled]="!bookingDate || !bookingTime || !description"></p-button>
+                <p-button label="Confirm Booking" icon="pi pi-check" (onClick)="confirmBooking()" [disabled]="!bookingDate || !bookingTime || !description || isLoading" [loading]="isLoading"></p-button>
             </ng-template>
         </p-dialog>
     </div>
@@ -119,6 +119,7 @@ export class DoctorSelectionComponent implements OnInit {
   allTimeSlots = ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'];
   availableTimeSlots: string[] = [];
   bookedAppointments: any[] = [];
+  isLoading = false;
 
   private appointmentService = inject(AppointmentService);
   private authService = inject(AuthService);
@@ -142,6 +143,7 @@ export class DoctorSelectionComponent implements OnInit {
     this.bookingTime = undefined;
     this.description = '';
     this.bookedAppointments = [];
+    this.isLoading = false;
 
     this.loadDoctorSchedule(doctor.id);
     this.availableTimeSlots = [];
@@ -188,6 +190,7 @@ export class DoctorSelectionComponent implements OnInit {
       const currentUser = this.authService.currentUser();
       if (!currentUser) return;
 
+      this.isLoading = true;
       const dateStr = this.formatDate(this.bookingDate);
 
       this.appointmentService.bookAppointment({
@@ -198,10 +201,16 @@ export class DoctorSelectionComponent implements OnInit {
         description: this.description || 'Consultation'
       }).subscribe({
         next: (res) => {
-          this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Appointment Request Sent!' });
-          this.displayBookingDialog = false;
+          if (res.success) {
+            this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Appointment Request Sent!' });
+            this.displayBookingDialog = false;
+          } else {
+            this.messageService.add({ severity: 'error', summary: 'Unavailable', detail: res.message || 'Slot is already taken' });
+          }
+          this.isLoading = false;
         },
         error: (err) => {
+          this.isLoading = false;
           this.messageService.add({ severity: 'error', summary: 'Booking Failed', detail: err.error?.message || 'Failed to book appointment' });
         }
       });

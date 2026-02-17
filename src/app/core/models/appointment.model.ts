@@ -11,6 +11,8 @@ export interface Appointment {
     timeSlot: string; // e.g. "10:00 AM"
     status: AppointmentStatus;
     notes?: string;
+    success?: boolean;
+    message?: string;
 }
 
 export interface AppointmentRequest {

@@ -1,0 +1,59 @@
+# Detailed API Workflow: Appointment Module (Line-by-Line)
+
+This document provides a technical walkthrough of the core API flows in the Appointment module, mapped directly to line numbers in the source code.
+
+---
+
+## 1. Flow: Booking an Appointment (`POST /api/v1/appointments`)
+
+This flow is triggered when a patient confirms a booking request in the UI.
+
+### Step A: Entry Point (Controller)
+**File**: [AppointmentController.java](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/controllers/AppointmentController.java)
+- **Line 23**: The `@PostMapping` annotation catches the request. `@Valid` ensures the [AppointmentRequest](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/dto/request/AppointmentRequest.java#8-24) body meets constraints.
+- **Line 24**: Passes the request object and immediately returns the result from `appointmentService.bookAppointment(request)`.
+
+### Step B: Business Logic (Service)
+**File**: [AppointmentService.java](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/service/AppointmentService.java)
+- **Line 27**: Method [bookAppointment](file:///home/artem/Desktop/DMS-Main/DMS/src/app/core/services/appointment.service.ts#38-41) starts inside a `@Transactional` block (Line 26).
+- **Line 28-33**: Fetches [Patient](file:///home/artem/Desktop/DMS-Main/DMS/src/app/features/appointments/appointment.component.ts#205-213) and [Provider](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/service/AppointmentService.java#71-79) (Dietitian) by their IDs. If either is missing, it throws a [ResourceNotFoundException](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/exception/ResourceNotFoundException.java#6-12) (custom 404).
+- **Line 36-37**: Calls `appointmentRepository.findByAppointmentDateAndDietitian` to find all existing bookings for that doctor on that day.
+- **Line 39-42**: Uses a stream to check if the specific `timeSlot` is already taken (ignoring `CANCELLED` or `REJECTED` status).
+- **Line 44-47**: **Validation Check**: If the slot is taken, it throws a [BookingConflictException](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/exception/BookingConflictException.java#6-12) (custom 409). This is what displays your "Time slot is already booked" toaster.
+- **Line 49-56**: Uses the `@Builder` to construct a new [Appointment](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/models/Appointment.java#11-62) entity with default status `PENDING`.
+- **Line 58**: **Persistence**: Saves the new entity to the database via `appointmentRepository.save(appointment)`.
+- **Line 59**: Converts the saved entity into an [AppointmentResponse](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/dto/response/AppointmentResponse.java#8-22) DTO and returns it.
+
+---
+
+## 2. Flow: Updating Status (`PUT /api/v1/appointments/{id}/status`)
+
+This flow is triggered when a dietitian accepts, rejects, or completes an appointment.
+
+### Step A: Entry Point (Controller)
+**File**: [AppointmentController.java](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/controllers/AppointmentController.java)
+- **Line 42-45**: The `@PutMapping` annotation identifies the appointment by `{id}` and receives the new `status` and optional `notes`.
+- **Line 47**: Delegates to `appointmentService.updateStatus`.
+
+### Step B: Business Logic (Service)
+**File**: [AppointmentService.java](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/service/AppointmentService.java)
+- **Line 87**: Method [updateStatus](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/service/AppointmentService.java#86-99) starts.
+- **Line 88-90**: Fetches the existing appointment. Throws [ResourceNotFoundException](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/exception/ResourceNotFoundException.java#6-12) (Line 89) if the ID is invalid.
+- **Line 92**: Updates the entity's status field.
+- **Line 93-95**: If notes are provided, updates the notes field.
+- **Line 97**: Saves the updated entity and returns the DTO.
+
+---
+
+## 3. Data Access (Repository)
+**File**: [AppointmentRepository.java](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/repositories/AppointmentRepository.java)
+- **Line 14**: [findByAppointmentDateAndDietitian](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/repositories/AppointmentRepository.java#14-15) generates an optimized SQL query to check availability:
+  ```sql
+  SELECT * FROM appointments WHERE appointment_date = ? AND dietitian_id = ?
+  ```
+
+---
+
+## 4. Error Handling (Global)
+**File**: [GlobalExceptionHandler.java](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/exception/GlobalExceptionHandler.java)
+- **Line 15-21**: Catches [BookingConflictException](file:///home/artem/Desktop/DMS-Main/DMS-Backend/src/main/java/com/example/DMS_Backend/exception/BookingConflictException.java#6-12) and converts it into a clean JSON response with a 409 status code. This allows the frontend to show a friendly error message instead of a "500 Internal Server Error".

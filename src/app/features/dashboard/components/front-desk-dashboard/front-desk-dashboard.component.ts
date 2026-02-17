@@ -5,12 +5,16 @@ import { SharedUiModule } from '../../../../shared/modules/shared-ui.module';
 import { RegisteredPatientsComponent } from '../registered-patients/registered-patients.component';
 import { AppointmentService } from '../../../../core/services/appointment.service';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { VitalsService } from '../../../../core/services/vitals.service';
 import { prepareChartData } from '../../utils/chart-utils';
+import { MessageService } from 'primeng/api';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 
 @Component({
     selector: 'app-front-desk-dashboard',
     standalone: true,
-    imports: [CommonModule, SharedUiModule, RegisteredPatientsComponent],
+    imports: [CommonModule, SharedUiModule, RegisteredPatientsComponent, ReactiveFormsModule],
+    providers: [MessageService],
     template: `
     <div class="grid mt-4">
         <!-- Stats Cards -->
@@ -37,9 +41,48 @@ import { prepareChartData } from '../../utils/chart-utils';
         <div class="col-12">
             <app-registered-patients 
                 [patients]="patientOverview"
-                (onRegister)="navigateTo('/registration')">
+                (onRegister)="navigateTo('/registration')"
+                (onAddVitals)="onAddVitals($event)">
             </app-registered-patients>
         </div>
+
+        <!-- Vitals Entry Dialog -->
+        <p-dialog [(visible)]="displayVitalsDialog" [modal]="true" [header]="'Add Patient Vitals'" [style]="{width: '50vw'}" [draggable]="false" [resizable]="false">
+            <div class="p-4">
+                <form [formGroup]="vitalsForm" class="grid p-fluid">
+                    <div class="col-12 md:col-6 mb-3">
+                        <label class="block font-bold mb-2">Height (cm)</label>
+                        <p-inputNumber formControlName="height" suffix=" cm" [min]="0" placeholder="e.g. 175"></p-inputNumber>
+                    </div>
+                    <div class="col-12 md:col-6 mb-3">
+                        <label class="block font-bold mb-2">Weight (kg)</label>
+                        <p-inputNumber formControlName="weight" suffix=" kg" [min]="0" [maxFractionDigits]="1" placeholder="e.g. 70.5"></p-inputNumber>
+                    </div>
+                    <div class="col-12 md:col-6 mb-3">
+                        <label class="block font-bold mb-2">Blood Pressure (Sys/Dia)</label>
+                        <div class="flex gap-2 align-items-center">
+                            <p-inputNumber formControlName="bloodPressureSys" placeholder="Sys" [min]="0"></p-inputNumber>
+                            <span>/</span>
+                            <p-inputNumber formControlName="bloodPressureDia" placeholder="Dia" [min]="0"></p-inputNumber>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6 mb-3">
+                        <label class="block font-bold mb-2">Heart Rate (bpm)</label>
+                        <p-inputNumber formControlName="heartRate" placeholder="e.g. 72" [min]="0"></p-inputNumber>
+                    </div>
+                    <div class="col-12 md:col-6 mb-3">
+                        <label class="block font-bold mb-2">Body Temp (°C)</label>
+                        <p-inputNumber formControlName="temperature" placeholder="e.g. 36.6" [min]="30" [max]="45" [maxFractionDigits]="1"></p-inputNumber>
+                    </div>
+                </form>
+            </div>
+            <ng-template pTemplate="footer">
+                <p-button label="Cancel" icon="pi pi-times" (onClick)="displayVitalsDialog=false" styleClass="p-button-text"></p-button>
+                <p-button label="Save Vitals" icon="pi pi-check" (onClick)="saveVitals()" [disabled]="vitalsForm.invalid"></p-button>
+            </ng-template>
+        </p-dialog>
+        
+        <p-toast></p-toast>
 
         <!-- Charts -->
         <div class="col-12 md:col-6">
@@ -64,6 +107,9 @@ import { prepareChartData } from '../../utils/chart-utils';
 export class FrontDeskDashboardComponent implements OnInit {
     private appointmentService = inject(AppointmentService);
     private authService = inject(AuthService);
+    private vitalsService = inject(VitalsService);
+    private messageService = inject(MessageService);
+    private fb = inject(FormBuilder);
     private router = inject(Router);
 
     patientOverview: any[] = [];
@@ -72,6 +118,18 @@ export class FrontDeskDashboardComponent implements OnInit {
     barChartData: any;
     barChartOptions: any;
     statsCards: any[] = [];
+
+    displayVitalsDialog: boolean = false;
+    selectedPatientId: number | null = null;
+    selectedVitalsId: number | null = null;
+    vitalsForm: FormGroup = this.fb.group({
+        height: [null, [Validators.required, Validators.min(0), Validators.max(300)]],
+        weight: [null, [Validators.required, Validators.min(0), Validators.max(500)]],
+        bloodPressureSys: [null, [Validators.min(0), Validators.max(300)]],
+        bloodPressureDia: [null, [Validators.min(0), Validators.max(300)]],
+        heartRate: [null, [Validators.min(0), Validators.max(300)]],
+        temperature: [null, [Validators.min(30), Validators.max(45)]]
+    });
 
     ngOnInit() {
         this.loadPatientOverview();
@@ -153,5 +211,55 @@ export class FrontDeskDashboardComponent implements OnInit {
 
     navigateTo(path: string) {
         this.router.navigate([path]);
+    }
+
+    onAddVitals(patientId: number) {
+        this.selectedPatientId = patientId;
+        this.selectedVitalsId = null;
+        this.vitalsForm.reset();
+
+        this.vitalsService.getLatestVitals(patientId).subscribe({
+            next: (vitals) => {
+                if (vitals) {
+                    this.selectedVitalsId = vitals.id;
+                    this.vitalsForm.patchValue(vitals);
+                }
+                this.displayVitalsDialog = true;
+            },
+            error: (err) => {
+                console.error('Failed to fetch latest vitals', err);
+                this.displayVitalsDialog = true;
+            }
+        });
+    }
+
+    saveVitals() {
+        if (this.vitalsForm.valid && this.selectedPatientId) {
+            const saveObs = this.selectedVitalsId
+                ? this.vitalsService.updateVitals(this.selectedVitalsId, this.vitalsForm.value)
+                : this.vitalsService.addVitals(this.selectedPatientId, this.vitalsForm.value);
+
+            saveObs.subscribe({
+                next: (savedVitals) => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: `Vitals ${this.selectedVitalsId ? 'updated' : 'recorded'} successfully`
+                    });
+
+                    // Optimization: Update local state instead of full reload
+                    const patient = this.patientOverview.find(p => p.id === this.selectedPatientId);
+                    if (patient) {
+                        patient.vitals = savedVitals;
+                    }
+
+                    this.displayVitalsDialog = false;
+                },
+                error: (err) => {
+                    console.error('Failed to save vitals', err);
+                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to save vitals' });
+                }
+            });
+        }
     }
 }
