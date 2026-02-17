@@ -1,26 +1,39 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { DietPlan } from '../models/diet-plan.model';
+import { Observable } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class PatientService {
-    // Map of Patient ID -> DietPlan
-    private patientNotes = new Map<number, DietPlan>();
-    // Progress Tracking
+    private http = inject(HttpClient);
+    private authService = inject(AuthService);
+    private readonly API_URL = 'http://localhost:8080/api/v1/patients';
+
+    saveDietPlan(patientId: number, plan: DietPlan): Observable<any> {
+        const currentUser = this.authService.currentUser();
+        const request = {
+            ...plan,
+            dietitianId: currentUser?.id
+        };
+        return this.http.post(`${this.API_URL}/${patientId}/diet-plans`, request);
+    }
+
+    getDietPlan(patientId: number): Observable<DietPlan> {
+        return this.http.get<DietPlan>(`${this.API_URL}/${patientId}/diet-plans/latest`);
+    }
+
+    // Progress Tracking (Keep for now, but these could also be moved to backend)
     private dietProgress = new Map<number, any>();
 
     constructor() {
-        this.loadFromStorage();
+        this.loadProgress();
     }
 
-    private loadFromStorage() {
+    private loadProgress() {
         if (typeof localStorage !== 'undefined') {
-            const storedPlans = localStorage.getItem('dms_diet_plans');
-            if (storedPlans) {
-                this.patientNotes = new Map(JSON.parse(storedPlans));
-            }
-
             const storedProgress = localStorage.getItem('dms_diet_progress');
             if (storedProgress) {
                 this.dietProgress = new Map(JSON.parse(storedProgress));
@@ -28,25 +41,15 @@ export class PatientService {
         }
     }
 
-    private saveToStorage() {
+    private saveProgress() {
         if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('dms_diet_plans', JSON.stringify(Array.from(this.patientNotes.entries())));
             localStorage.setItem('dms_diet_progress', JSON.stringify(Array.from(this.dietProgress.entries())));
         }
     }
 
-    saveDietPlan(patientId: number, plan: DietPlan): void {
-        this.patientNotes.set(patientId, plan);
-        this.saveToStorage();
-    }
-
-    getDietPlan(patientId: number): DietPlan | undefined {
-        return this.patientNotes.get(patientId);
-    }
-
     saveDietProgress(patientId: number, status: any): void {
         this.dietProgress.set(patientId, status);
-        this.saveToStorage();
+        this.saveProgress();
     }
 
     getDietProgress(patientId: number): any {

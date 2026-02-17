@@ -16,7 +16,9 @@ export class AppointmentService {
         return this.authService.getDietitians().pipe(
             map(users => users.map(u => ({
                 id: u.id,
-                name: (u.firstName + ' ' + u.lastName).trim() || u.username,
+                name: (u.firstName && u.lastName)
+                    ? `${u.firstName} ${u.lastName}`
+                    : (u.firstName || u.lastName || u.username),
                 speciality: 'Certified Dietitian',
                 username: u.username
             })))

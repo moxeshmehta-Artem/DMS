@@ -15,6 +15,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { FormsModule } from '@angular/forms';
 import { PatientService } from '../../core/services/patient.service';
+import { VitalsService } from '../../core/services/vitals.service';
 import { User } from '../../core/models/user.model';
 
 @Component({
@@ -158,6 +159,7 @@ export class AppointmentComponent implements OnInit {
 
   private appointmentService = inject(AppointmentService);
   private patientService = inject(PatientService);
+  private vitalsService = inject(VitalsService);
   private authService = inject(AuthService);
   private messageService = inject(MessageService);
 
@@ -193,10 +195,17 @@ export class AppointmentComponent implements OnInit {
 
   saveDietPlan() {
     if (this.selectedAppt && this.isPlanValid) {
-      this.patientService.saveDietPlan(this.selectedAppt.patientId, this.newPlan);
-      this.updateStatus(this.selectedAppt, 'COMPLETED');
-      //   this.messageService.add({ severity: 'success', summary: 'Plan Saved', detail: 'Diet plan created and appointment completed' });
-      this.displayDietPlanDialog = false;
+      this.patientService.saveDietPlan(this.selectedAppt.patientId, this.newPlan).subscribe({
+        next: () => {
+          this.updateStatus(this.selectedAppt!, 'COMPLETED');
+          this.displayDietPlanDialog = false;
+          this.messageService.add({ severity: 'success', summary: 'Plan Saved', detail: 'Diet plan created and appointment completed' });
+        },
+        error: (err) => {
+          console.error('Failed to save diet plan', err);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to save diet plan to database' });
+        }
+      });
     } else {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Please fill in Breakfast, Lunch, and Dinner details' });
     }
@@ -206,7 +215,21 @@ export class AppointmentComponent implements OnInit {
   viewPatient(patientId: number) {
     const user = this.authService.getAllUsers().find(u => u.id === patientId);
     if (user) {
-      this.selectedPatient = user;
+      this.selectedPatient = { ...user };
+
+      // Fetch latest vitals from backend
+      this.vitalsService.getLatestVitals(patientId).subscribe({
+        next: (vitals) => {
+          if (this.selectedPatient && this.selectedPatient.id === patientId) {
+            this.selectedPatient.vitals = vitals;
+          }
+        },
+        error: (err) => {
+          console.warn('Could not fetch latest vitals', err);
+          // Fallback to what we have or empty
+        }
+      });
+
       this.displayPatientDialog = true;
     }
   }
