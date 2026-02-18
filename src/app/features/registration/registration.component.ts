@@ -14,87 +14,8 @@ import { MessageService } from 'primeng/api';
     SharedUiModule
   ],
   providers: [MessageService],
-  template: `
-    <div class="flex justify-content-center p-4">
-        <p-toast></p-toast>
-        <p-card header="Patient Registration" subheader="Register new patient" [style]="{ width: '100%', maxWidth: '800px' }">
-            <form [formGroup]="regForm" (ngSubmit)="onSubmit()" class="flex flex-column gap-3">
-                
-                <!-- PERSONAL DETAILS -->
-                <h3 class="m-0 text-primary">Personal Details</h3>
-                <div class="grid p-fluid">
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">First Name</label>
-                        <input pInputText formControlName="firstName" placeholder="First Name" />
-                        <small class="text-red-500" *ngIf="isInvalid('firstName')">First Name is required</small>
-                    </div>
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Last Name</label>
-                        <input pInputText formControlName="lastName" placeholder="Last Name" />
-                        <small class="text-red-500" *ngIf="isInvalid('lastName')">Last Name is required</small>
-                    </div>
-                    
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Date of Birth</label>
-                        <p-calendar formControlName="dob" dateFormat="dd/mm/yy" [showIcon]="true" placeholder="DD/MM/YYYY"></p-calendar>
-                        <small class="text-red-500" *ngIf="isInvalid('dob')">Date of Birth is required</small>
-                    </div>
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Gender</label>
-                        <p-dropdown [options]="genders" formControlName="gender" placeholder="Select Gender"></p-dropdown>
-                        <small class="text-red-500" *ngIf="isInvalid('gender')">Gender is required</small>
-                    </div>
-
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Email</label>
-                        <input pInputText formControlName="email" placeholder="email@example.com" />
-                        <small class="text-red-500" *ngIf="isInvalid('email')">Email is required</small>
-                    </div>
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Phone</label>
-                        <input pInputText formControlName="phone" placeholder="+1 234 567 890" />
-                        <small class="text-red-500" *ngIf="isInvalid('phone')">Phone must be 10-15 digits</small>
-                    </div>
-                    
-                    <div class="col-12">
-                        <label class="block mb-2 font-bold">Address</label>
-                        <textarea pInputTextarea formControlName="address" rows="2" placeholder="Street Address"></textarea>
-                        <small class="text-red-500" *ngIf="isInvalid('address')">Address is required</small>
-                    </div>
-                </div>
-
-                <p-divider></p-divider>
-
-                <!-- LOGIN CREDENTIALS -->
-                <h3 class="m-0 text-primary">Account Credentials</h3>
-                <div class="grid p-fluid">
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Username</label>
-                        <input pInputText formControlName="username" placeholder="Username" />
-                        <small class="text-red-500" *ngIf="isInvalid('username')">Username is required on registration</small>
-                    </div>
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Password</label>
-                        <p-password formControlName="password" [toggleMask]="true" [feedback]="false" placeholder="Initial Password"></p-password>
-                        <small class="text-red-500" *ngIf="isInvalid('password')">Password is required</small>
-                    </div>
-                    <div class="col-12 md:col-6">
-                        <label class="block mb-2 font-bold">Confirm Password</label>
-                        <p-password formControlName="confirmPassword" [toggleMask]="true" [feedback]="false" placeholder="Confirm Password"></p-password>
-                        <small class="text-red-500" *ngIf="regForm.hasError('mismatch') && (regForm.get('confirmPassword')?.dirty || regForm.get('confirmPassword')?.touched)">Passwords do not match</small>
-                    </div>
-                </div>
-
-                <p-divider></p-divider>
-
-                <div class="flex justify-content-end mt-4 gap-2">
-                    <p-button label="Reset" icon="pi pi-refresh" styleClass="p-button-secondary" (onClick)="resetForm()"></p-button>
-                    <p-button label="Register Patient" icon="pi pi-check" (onClick)="onSubmit()" [disabled]="regForm.invalid"></p-button>
-                </div>
-            </form>
-        </p-card>
-    </div>
-    `
+  templateUrl: './registration.component.html',
+  styleUrls: ['./registration.component.scss']
 })
 export class RegistrationComponent {
   private fb = inject(FormBuilder);

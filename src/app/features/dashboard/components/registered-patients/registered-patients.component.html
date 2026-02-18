@@ -1,0 +1,95 @@
+<div class="surface-card p-4 shadow-2 border-round mt-4">
+    <div class="flex justify-content-between align-items-center mb-3">
+        <div class="text-2xl font-medium text-900">Registered Patients</div>
+        <div class="flex gap-2">
+            <span class="p-input-icon-left">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                    placeholder="Search..." />
+            </span>
+            <button pButton icon="pi pi-user-plus" label="Register New" (click)="onRegister.emit()"
+                class="p-button-sm"></button>
+        </div>
+    </div>
+
+    <p-table #dt [value]="patients" [paginator]="true" [rows]="5" responsiveLayout="stack" [breakpoint]="'960px'"
+        [globalFilterFields]="['firstName','lastName','username','phone']">
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="firstName">Name <p-sortIcon field="firstName"></p-sortIcon></th>
+                <th pSortableColumn="dob">Age <p-sortIcon field="dob"></p-sortIcon></th>
+                <th>Gender</th>
+                <th>Contact</th>
+                <th>Vitals (Latest)</th>
+                <th>Latest Appointment</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-patient>
+            <tr>
+                <td>
+                    <span class="p-column-title font-bold mr-2">Name</span>
+                    <div class="inline-block vertical-align-middle">
+                        <div class="font-medium">{{ patient.firstName }} {{ patient.lastName }}</div>
+                        <small class="text-500">{{ patient.username }}</small>
+                    </div>
+                </td>
+                <td>
+                    <span class="p-column-title font-bold mr-2">Age</span>
+                    {{ patient.age || 0 }} yrs
+                </td>
+                <td>
+                    <span class="p-column-title font-bold mr-2">Gender</span>
+                    {{ patient.gender }}
+                </td>
+                <td>
+                    <span class="p-column-title font-bold mr-2">Contact</span>
+                    <div class="inline-block vertical-align-middle">
+                        <div>{{ patient.phone }}</div>
+                    </div>
+                </td>
+                <td>
+                    <span class="p-column-title font-bold mr-2">Vitals</span>
+                    <div *ngIf="patient.vitals" class="text-sm inline-flex gap-3 vertical-align-middle">
+                        <div><i class="pi pi-arrows-v text-primary mr-1"></i> {{ patient.vitals.height }}cm</div>
+                        <div><i class="pi pi-stop text-primary mr-1"></i> {{ patient.vitals.weight }}kg</div>
+                    </div>
+                </td>
+                <td>
+                    <span class="p-column-title font-bold mr-2">Latest Appt</span>
+                    <div *ngIf="patient.latestAppointment" class="inline-block vertical-align-middle pl-6">
+                        <div class="font-medium">{{ patient.latestAppointment.date | date:'shortDate' }}</div>
+                    </div>
+                    <span *ngIf="!patient.latestAppointment" class="text-500">-</span>
+                </td>
+                <td>
+                    <span class="p-column-title font-bold mr-2">Status</span>
+                    <div class="flex align-items-center gap-2">
+                        <p-tag *ngIf="patient.latestAppointment"
+                            [severity]="patient.latestAppointment.status | statusSeverity"
+                            [value]="patient.latestAppointment.status"></p-tag>
+                    </div>
+                </td>
+                <td>
+                    <span class="p-column-title font-bold mr-2">Actions</span>
+                    <div class="flex gap-2">
+                        <button *ngIf="!patient.vitals" pButton icon="pi pi-plus-circle" label="Add Vitals"
+                            (click)="onAddVitals.emit(patient.id)"
+                            class="p-button-sm p-button-outlined p-button-success">
+                        </button>
+                        <button *ngIf="patient.vitals" pButton icon="pi pi-pencil" label="Edit Vitals"
+                            (click)="onAddVitals.emit(patient.id)"
+                            class="p-button-sm p-button-outlined p-button-warning">
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="7" class="text-center p-4">No patients registered yet.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
