@@ -28,6 +28,7 @@ export interface SignupRequest {
     role: string;
     firstName?: string;
     lastName?: string;
+    phone?: string;
     gender?: string;
     dateOfBirth?: string;
     // Vitals could be a separate call or added to DTO if backend supports it
@@ -100,6 +101,7 @@ export class AuthService {
             role: 'ROLE_PATIENT',
             firstName: userModel.firstName,
             lastName: userModel.lastName,
+            phone: userModel.phone,
             gender: userModel.gender,
             dateOfBirth: userModel.dob ? (userModel.dob instanceof Date ? userModel.dob.toISOString().split('T')[0] : userModel.dob) : undefined
         };
@@ -210,6 +212,7 @@ export class AuthService {
                 lastName: u.lastName,
                 gender: u.gender,
                 email: u.email,
+                phone: u.phone,
                 age: u.age,
                 token: '',
                 permissions: []
