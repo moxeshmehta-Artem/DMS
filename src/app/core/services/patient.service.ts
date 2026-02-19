@@ -25,6 +25,16 @@ export class PatientService {
         return this.http.get<DietPlan>(`${this.API_URL}/${patientId}/diet-plans/latest`);
     }
 
+    getPatientById(patientId: number): Observable<any> {
+        // PatientController is @RequestMapping("/api/patients")
+        return this.http.get<any>(`http://localhost:8080/api/patients/${patientId}`);
+    }
+
+    getVitalsHistory(patientId: number): Observable<any[]> {
+        // VitalsController is @RequestMapping("/api/v1/patients")
+        return this.http.get<any[]>(`${this.API_URL}/${patientId}/vitals`);
+    }
+
     // Progress Tracking (Keep for now, but these could also be moved to backend)
     private dietProgress = new Map<number, any>();
 

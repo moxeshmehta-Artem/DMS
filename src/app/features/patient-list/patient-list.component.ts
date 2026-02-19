@@ -6,6 +6,7 @@ import { PatientService } from '../../core/services/patient.service';
 import { MessageService, MenuItem } from 'primeng/api';
 import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 import { Appointment } from '../../core/models/appointment.model';
+import { forkJoin } from 'rxjs'; // Import forkJoin
 
 @Component({
   selector: 'app-patient-list',
@@ -58,32 +59,49 @@ import { Appointment } from '../../core/models/appointment.model';
         <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
 
         <!-- PATIENT DETAILS DIALOG -->
-        <p-dialog [(visible)]="displayPatientDialog" [header]="selectedPatient?.name" [modal]="true" [style]="{width: '400px'}">
+        <p-dialog [(visible)]="displayPatientDialog" [header]="selectedPatient?.name" [modal]="true" [style]="{width: '600px'}">
             <div class="flex flex-column gap-3" *ngIf="selectedPatientDetails">
+                
                 <div class="grid">
-                    <div class="col-6 font-bold">Age:</div>
-                    <div class="col-6">{{ selectedPatientDetails.dob | date:'mediumDate' }}</div>
-                    
-                    <div class="col-6 font-bold">Gender:</div>
-                    <div class="col-6">{{ selectedPatientDetails.gender }}</div>
-                    
-                    <div class="col-12"><hr class="opacity-50"></div>
-                    <div class="col-12 text-primary font-bold">Vitals</div>
-
-                    <div class="col-6 font-bold">Height:</div>
-                    <div class="col-6">{{ selectedPatientDetails.vitals?.height || '-' }} cm</div>
-
-                    <div class="col-6 font-bold">Weight:</div>
-                    <div class="col-6">{{ selectedPatientDetails.vitals?.weight || '-' }} kg</div>
-                    
-                    <div class="col-6 font-bold">Blood Pressure:</div>
+                    <!-- Column 1: Profile -->
                     <div class="col-6">
-                        {{ selectedPatientDetails.vitals?.bloodPressureSys || '-' }}/{{ selectedPatientDetails.vitals?.bloodPressureDia || '-' }}
+                        <h4 class="mt-0 mb-3 text-500">Profile</h4>
+                        <div class="grid">
+                             <div class="col-4 font-bold">Age:</div>
+                             <div class="col-8">{{ selectedPatientDetails.age || '-' }}</div>
+                             
+                             <div class="col-4 font-bold">Gender:</div>
+                             <div class="col-8">{{ selectedPatientDetails.gender }}</div>
+                             
+                             <div class="col-4 font-bold">Email:</div>
+                             <div class="col-8" style="word-break: break-all;">{{ selectedPatientDetails.email }}</div>
+                        </div>
                     </div>
 
-                    <div class="col-6 font-bold">Heart Rate:</div>
-                    <div class="col-6">{{ selectedPatientDetails.vitals?.heartRate || '-' }} bpm</div>
+                    <!-- Column 2: Latest Vitals (Fetched from History) -->
+                    <div class="col-6 border-left-1 surface-border pl-3">
+                        <h4 class="mt-0 mb-3 text-500">Latest Vitals</h4>
+                        <div class="grid" *ngIf="latestVital; else noVitals">
+                             <div class="col-5 font-bold">Height:</div>
+                             <div class="col-7">{{ latestVital.height || '-' }} cm</div>
+
+                             <div class="col-5 font-bold">Weight:</div>
+                             <div class="col-7">{{ latestVital.weight || '-' }} kg</div>
+                             
+                             <div class="col-5 font-bold">BP:</div>
+                             <div class="col-7">
+                                {{ latestVital.bloodPressureSys || '-' }}/{{ latestVital.bloodPressureDia || '-' }}
+                             </div>
+
+                             <div class="col-5 font-bold">Heart Rate:</div>
+                             <div class="col-7">{{ latestVital.heartRate || '-' }} bpm</div>
+                        </div>
+                        <ng-template #noVitals>
+                            <div class="text-500 font-italic">No vitals recorded.</div>
+                        </ng-template>
+                    </div>
                 </div>
+
             </div>
             <ng-template pTemplate="footer">
                 <p-button label="Close" icon="pi pi-times" (onClick)="displayPatientDialog = false"></p-button>
@@ -99,6 +117,7 @@ export class PatientListComponent implements OnInit {
   displayPatientDialog = false;
   selectedPatient: any = null;
   selectedPatientDetails: any = null;
+  latestVital: any = null;
 
   menuItems: MenuItem[] | undefined;
 
@@ -180,12 +199,24 @@ export class PatientListComponent implements OnInit {
   }
 
   viewPatientDetails(patient: any) {
-    // Currently using the cached users, eventually fetch from backend if needed
-    const user = this.authService.getAllUsers().find(u => u.id === patient.id);
-    if (user) {
-      this.selectedPatientDetails = user;
-      this.displayPatientDialog = true;
-    }
+    this.selectedPatientDetails = null; // Reset
+    this.latestVital = null; // Reset
+
+    forkJoin({
+      details: this.patientService.getPatientById(patient.id),
+      history: this.patientService.getVitalsHistory(patient.id)
+    }).subscribe({
+      next: ({ details, history }) => {
+        this.selectedPatientDetails = details;
+        // Assuming history is sorted desc by backend (VitalsService.getVitalsHistory does this)
+        this.latestVital = history && history.length > 0 ? history[0] : null;
+        this.displayPatientDialog = true;
+      },
+      error: (err) => {
+        console.error('Failed to load patient data', err);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load patient data' });
+      }
+    });
   }
 
   completeConsultation(patient: any) {
