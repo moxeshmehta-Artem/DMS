@@ -74,7 +74,7 @@ export class DoctorSelectionComponent implements OnInit {
     this.bookedAppointments = [];
     this.isLoading = false;
 
-    this.loadDoctorSchedule(doctor.id);
+    // this.loadDoctorSchedule(doctor.id); // Optimized: No longer fetching all history
     this.availableTimeSlots = [];
 
     this.displayBookingDialog = true;
@@ -92,19 +92,25 @@ export class DoctorSelectionComponent implements OnInit {
   updateAvailableSlots() {
     if (!this.bookingDate || !this.selectedDietitian) return;
 
+    this.isLoading = true;
     const selectedDateStr = this.formatDate(this.bookingDate);
 
-    this.availableTimeSlots = this.allTimeSlots.filter(slot => {
-      const isBooked = this.bookedAppointments.some(appt =>
-        appt.appointmentDate === selectedDateStr &&
-        appt.timeSlot === slot
-      );
-      return !isBooked;
-    });
+    this.appointmentService.getAvailableSlots(this.selectedDietitian.id, selectedDateStr).subscribe({
+      next: (slots) => {
+        this.availableTimeSlots = slots;
+        this.isLoading = false;
 
-    if (this.bookingTime && !this.availableTimeSlots.includes(this.bookingTime)) {
-      this.bookingTime = undefined;
-    }
+        // Reset selected time if it's no longer available
+        if (this.bookingTime && !this.availableTimeSlots.includes(this.bookingTime)) {
+          this.bookingTime = undefined;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load available slots', err);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Could not load time slots' });
+        this.isLoading = false;
+      }
+    });
   }
 
   private formatDate(date: Date): string {

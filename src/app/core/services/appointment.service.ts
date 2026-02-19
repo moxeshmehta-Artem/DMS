@@ -64,6 +64,15 @@ export class AppointmentService {
         return this.authService.registerDietitian(data, data.password);
     }
 
+    getAvailableSlots(providerId: number, date: string): Observable<string[]> {
+        return this.http.get<string[]>(`${this.API_URL}/available-slots`, {
+            params: {
+                providerId: providerId.toString(),
+                date: date
+            }
+        });
+    }
+
     removeDietitian(id: number): Observable<any> {
         return this.http.delete(`http://localhost:8080/api/users/${id}`);
     }
