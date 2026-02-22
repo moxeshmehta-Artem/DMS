@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { UserService } from '../../core/services/user.service';
 import { Appointment, AppointmentStatus } from '../../core/models/appointment.model';
 
 // PrimeNG Imports
@@ -159,6 +160,7 @@ export class AppointmentComponent implements OnInit {
 
   private appointmentService = inject(AppointmentService);
   private patientService = inject(PatientService);
+  private userService = inject(UserService);
   private vitalsService = inject(VitalsService);
   private authService = inject(AuthService);
   private messageService = inject(MessageService);
@@ -213,25 +215,26 @@ export class AppointmentComponent implements OnInit {
 
   // PATIENT DETAILS
   viewPatient(patientId: number) {
-    const user = this.authService.getAllUsers().find(u => u.id === patientId);
-    if (user) {
-      this.selectedPatient = { ...user };
+    this.userService.getUsers().subscribe(users => {
+      const user = users.find(u => u.id === patientId);
+      if (user) {
+        this.selectedPatient = { ...user };
 
-      // Fetch latest vitals from backend
-      this.vitalsService.getLatestVitals(patientId).subscribe({
-        next: (vitals) => {
-          if (this.selectedPatient && this.selectedPatient.id === patientId) {
-            this.selectedPatient.vitals = vitals;
+        // Fetch latest vitals from backend
+        this.vitalsService.getLatestVitals(patientId).subscribe({
+          next: (vitals) => {
+            if (this.selectedPatient && this.selectedPatient.id === patientId) {
+              this.selectedPatient.vitals = vitals;
+            }
+          },
+          error: (err) => {
+            console.warn('Could not fetch latest vitals', err);
           }
-        },
-        error: (err) => {
-          console.warn('Could not fetch latest vitals', err);
-          // Fallback to what we have or empty
-        }
-      });
+        });
 
-      this.displayPatientDialog = true;
-    }
+        this.displayPatientDialog = true;
+      }
+    });
   }
 
   updateStatus(appt: Appointment, status: AppointmentStatus) {

@@ -5,6 +5,7 @@ import { SharedUiModule } from '../../../../shared/modules/shared-ui.module';
 import { RegisteredPatientsComponent } from '../registered-patients/registered-patients.component';
 import { AppointmentService } from '../../../../core/services/appointment.service';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { UserService } from '../../../../core/services/user.service';
 import { VitalsService } from '../../../../core/services/vitals.service';
 import { prepareChartData } from '../../utils/chart-utils';
 import { MessageService } from 'primeng/api';
@@ -21,6 +22,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 export class FrontDeskDashboardComponent implements OnInit {
     private appointmentService = inject(AppointmentService);
     private authService = inject(AuthService);
+    private userService = inject(UserService);
     private vitalsService = inject(VitalsService);
     private messageService = inject(MessageService);
     private fb = inject(FormBuilder);
@@ -50,7 +52,7 @@ export class FrontDeskDashboardComponent implements OnInit {
     }
 
     loadPatientOverview() {
-        this.authService.getAllPatients().subscribe({
+        this.userService.getAllPatients().subscribe({
             next: (patients) => {
                 this.appointmentService.getAllAppointments().subscribe({
                     next: (allAppointments) => {

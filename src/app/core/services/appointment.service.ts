@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Appointment, AppointmentRequest, AppointmentStatus } from '../models/appointment.model';
 import { AuthService } from '../auth/auth.service';
+import { UserService } from './user.service';
 import { Observable, map } from 'rxjs';
 
 @Injectable({
@@ -10,10 +11,11 @@ import { Observable, map } from 'rxjs';
 export class AppointmentService {
     private http = inject(HttpClient);
     private authService = inject(AuthService);
+    private userService = inject(UserService);
     private readonly API_URL = 'http://localhost:8080/api/v1/appointments';
 
     getDietitians() {
-        return this.authService.getDietitians().pipe(
+        return this.userService.getDietitians().pipe(
             map(users => users.map(u => ({
                 id: u.id,
                 name: (u.firstName && u.lastName)
@@ -74,6 +76,6 @@ export class AppointmentService {
     }
 
     removeDietitian(id: number): Observable<any> {
-        return this.http.delete(`http://localhost:8080/api/users/${id}`);
+        return this.userService.deleteUser(id);
     }
 }
