@@ -51,6 +51,8 @@ export class UserService {
             email: u.email,
             phone: u.phone,
             age: u.age,
+            vitals: u.vitals,
+            latestAppointment: u.latestAppointment,
             permissions: [],
             token: ''
         };

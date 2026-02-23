@@ -25,4 +25,9 @@ export interface User {
         heartRate?: number;
         temperature?: number;
     };
+    latestAppointment?: {
+        id: number;
+        date: string;
+        status: string;
+    };
 }

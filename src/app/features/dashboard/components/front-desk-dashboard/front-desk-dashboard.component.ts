@@ -107,16 +107,11 @@ export class FrontDeskDashboardComponent implements OnInit {
                         this.barChartData = charts.barChartData;
                         this.barChartOptions = charts.barChartOptions;
 
-                        this.patientOverview = patients.map((patient: any) => {
-                            // Find latest appointment
-                            const patientAppts = allAppointments.filter(a => a.patientId === patient.id);
-                            const latestAppt = patientAppts.length > 0 ? patientAppts[patientAppts.length - 1] : null;
-
-                            return {
-                                ...patient,
-                                latestAppointment: latestAppt
-                            };
-                        });
+                        this.patientOverview = patients.map((patient: any) => ({
+                            ...patient,
+                            // Use backend latestAppointment if available, fallback to manual if absolutely needed
+                            latestAppointment: patient.latestAppointment || null
+                        }));
                     },
                     error: (err) => console.error('Failed to load appointments', err)
                 });
