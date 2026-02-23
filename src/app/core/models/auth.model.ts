@@ -23,3 +23,8 @@ export interface SignupRequest {
     gender?: string;
     dateOfBirth?: string;
 }
+
+export interface RegistrationResponse {
+    success: boolean;
+    message: string;
+}

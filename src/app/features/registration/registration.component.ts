@@ -63,13 +63,15 @@ export class RegistrationComponent {
 
       this.authService.registerPatient(newUser, formVal.password)
         .subscribe({
-          next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient Registered Successfully' });
+          next: (res: any) => {
+            console.log('Registration Success:', res);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: res.message || 'Patient Registered Successfully' });
             this.resetForm();
           },
           error: (err) => {
             console.error('Registration failed', err);
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Registration failed' });
+            const errorMsg = err.error?.message || 'Registration failed';
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: errorMsg });
           }
         });
     } else {

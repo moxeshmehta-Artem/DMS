@@ -61,17 +61,18 @@ export class AddDietitianComponent {
 
             if (result$) {
                 result$.subscribe({
-                    next: () => {
-                        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Dietitian added successfully' });
+                    next: (res: any) => {
+                        console.log('Add Dietitian Success:', res);
+                        this.messageService.add({ severity: 'success', summary: 'Success', detail: res.message || 'Dietitian added successfully' });
                         this.dietitianForm.reset();
                     },
                     error: (err) => {
-                        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add Dietitian' });
-                        console.error(err);
+                        console.error('Add Dietitian failed', err);
+                        const errorMsg = err.error?.message || 'Failed to add Dietitian';
+                        this.messageService.add({ severity: 'error', summary: 'Error', detail: errorMsg });
                     }
                 });
             } else {
-                // Fallback likely unreachable
                 this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Operation completed locally' });
                 this.dietitianForm.reset();
             }
