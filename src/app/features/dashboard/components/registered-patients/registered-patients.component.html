@@ -20,7 +20,6 @@
                 <th pSortableColumn="dob">Age <p-sortIcon field="dob"></p-sortIcon></th>
                 <th>Gender</th>
                 <th>Contact</th>
-                <th>Vitals (Latest)</th>
                 <th>Latest Appointment</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -47,13 +46,6 @@
                     <span class="p-column-title font-bold mr-2">Contact</span>
                     <div class="inline-block vertical-align-middle">
                         <div>{{ patient.phone }}</div>
-                    </div>
-                </td>
-                <td>
-                    <span class="p-column-title font-bold mr-2">Vitals</span>
-                    <div *ngIf="patient.vitals" class="text-sm inline-flex gap-3 vertical-align-middle">
-                        <div><i class="pi pi-arrows-v text-primary mr-1"></i> {{ patient.vitals.height }}cm</div>
-                        <div><i class="pi pi-stop text-primary mr-1"></i> {{ patient.vitals.weight }}kg</div>
                     </div>
                 </td>
                 <td>
