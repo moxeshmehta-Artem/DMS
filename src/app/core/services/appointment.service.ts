@@ -12,7 +12,7 @@ export class AppointmentService {
     private http = inject(HttpClient);
     private authService = inject(AuthService);
     private userService = inject(UserService);
-    private readonly API_URL = 'http://localhost:8080/api/v1/appointments';
+    private readonly API_URL = 'http://localhost:8080/api/appointments';
 
     getDietitians() {
         return this.userService.getDietitians().pipe(

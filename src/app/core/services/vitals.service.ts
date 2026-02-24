@@ -23,7 +23,7 @@ export interface VitalsResponse extends VitalsRequest {
 })
 export class VitalsService {
     private http = inject(HttpClient);
-    private apiUrl = 'http://localhost:8080/api/v1/patients';
+    private apiUrl = 'http://localhost:8080/api/patients';
 
     addVitals(patientId: number, vitals: VitalsRequest): Observable<VitalsResponse> {
         return this.http.post<VitalsResponse>(`${this.apiUrl}/${patientId}/vitals`, vitals);

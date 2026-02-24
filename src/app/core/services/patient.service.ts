@@ -10,7 +10,7 @@ import { AuthService } from '../auth/auth.service';
 export class PatientService {
     private http = inject(HttpClient);
     private authService = inject(AuthService);
-    private readonly API_URL = 'http://localhost:8080/api/v1/patients';
+    private readonly API_URL = 'http://localhost:8080/api/patients';
 
     saveDietPlan(patientId: number, plan: DietPlan): Observable<any> {
         const currentUser = this.authService.currentUser();
