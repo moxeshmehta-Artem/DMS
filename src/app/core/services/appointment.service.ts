@@ -27,6 +27,18 @@ export class AppointmentService {
         );
     }
 
+    getDietitianSelection() {
+        return this.userService.getDietitianSelection().pipe(
+            map(users => users.map(u => ({
+                id: u.id,
+                name: (u.firstName && u.lastName)
+                    ? `${u.firstName} ${u.lastName}`
+                    : (u.firstName || u.lastName || u.username),
+                speciality: 'Certified Dietitian'
+            })))
+        );
+    }
+
     getAllAppointments(): Observable<Appointment[]> {
         return this.http.get<Appointment[]>(this.API_URL);
     }

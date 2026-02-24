@@ -18,6 +18,10 @@ export class UserService {
         );
     }
 
+    getDietitianSelection(): Observable<any[]> {
+        return this.http.get<any[]>(`${this.API_URL}/dietitians/selection`);
+    }
+
     getAllPatients(): Observable<User[]> {
         return this.http.get<any[]>(`${this.API_URL}/patients`).pipe(
             map(users => users.map(u => ({

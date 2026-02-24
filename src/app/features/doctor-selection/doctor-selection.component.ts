@@ -55,7 +55,7 @@ export class DoctorSelectionComponent implements OnInit {
   private messageService = inject(MessageService);
 
   ngOnInit() {
-    this.appointmentService.getDietitians().subscribe({
+    this.appointmentService.getDietitianSelection().subscribe({
       next: (data: any[]) => {
         this.dietitians = data;
       },

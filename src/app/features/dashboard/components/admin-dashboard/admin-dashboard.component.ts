@@ -75,7 +75,7 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     refreshList() {
-        this.appointmentService.getDietitians().subscribe({
+        this.appointmentService.getDietitianSelection().subscribe({
             next: (data: any[]) => {
                 this.dietitians = data;
             },
