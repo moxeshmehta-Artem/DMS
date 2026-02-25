@@ -7,7 +7,10 @@
             <div class="field">
                 <label class="block font-bold mb-2">Dietitian Name</label>
                 <input pInputText formControlName="name" placeholder="Dt. Jane Doe" class="w-full" />
-                <small *ngIf="isInvalid('name')" class="text-red-500">Name is required</small>
+                <small *ngIf="isInvalid('name')" class="text-red-500">
+                    {{ dietitianForm.get('name')?.hasError('pattern') ? 'Numbers are not allowed in names' : 'Name is
+                    required' }}
+                </small>
             </div>
 
             <div class="field">

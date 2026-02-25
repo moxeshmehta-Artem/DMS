@@ -26,8 +26,8 @@ export class RegistrationComponent {
   genders = ['Male', 'Female', 'Other'];
 
   regForm: FormGroup = this.fb.group({
-    firstName: ['', Validators.required],
-    lastName: ['', Validators.required],
+    firstName: ['', [Validators.required, Validators.pattern('^[a-zA-Z ]*$')]],
+    lastName: ['', [Validators.required, Validators.pattern('^[a-zA-Z ]*$')]],
     dob: [null, Validators.required],
     gender: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],

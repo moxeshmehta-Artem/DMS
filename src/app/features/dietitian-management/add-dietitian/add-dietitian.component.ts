@@ -36,7 +36,7 @@ export class AddDietitianComponent {
     private messageService = inject(MessageService);
 
     dietitianForm: FormGroup = this.fb.group({
-        name: ['', Validators.required],
+        name: ['', [Validators.required, Validators.pattern('^[a-zA-Z ]*$')]],
         username: ['', Validators.required],
         password: ['', Validators.required],
         confirmPassword: ['', Validators.required],

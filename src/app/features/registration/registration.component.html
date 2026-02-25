@@ -10,12 +10,18 @@
                 <div class="col-12 md:col-6">
                     <label class="block mb-2 font-bold">First Name</label>
                     <input pInputText formControlName="firstName" placeholder="First Name" />
-                    <small class="text-red-500" *ngIf="isInvalid('firstName')">First Name is required</small>
+                    <small class="text-red-500" *ngIf="isInvalid('firstName')">
+                        {{ regForm.get('firstName')?.hasError('pattern') ? 'Numbers are not allowed in names' : 'First
+                        Name is required' }}
+                    </small>
                 </div>
                 <div class="col-12 md:col-6">
                     <label class="block mb-2 font-bold">Last Name</label>
                     <input pInputText formControlName="lastName" placeholder="Last Name" />
-                    <small class="text-red-500" *ngIf="isInvalid('lastName')">Last Name is required</small>
+                    <small class="text-red-500" *ngIf="isInvalid('lastName')">
+                        {{ regForm.get('lastName')?.hasError('pattern') ? 'Numbers are not allowed in names' : 'Last
+                        Name is required' }}
+                    </small>
                 </div>
 
                 <div class="col-12 md:col-6">
