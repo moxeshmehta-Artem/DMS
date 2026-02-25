@@ -23,6 +23,16 @@ import { MenubarModule } from 'primeng/menubar';
 import { DividerModule } from 'primeng/divider';
 import { MenuModule } from 'primeng/menu';
 import { ChartModule } from 'primeng/chart';
+import { TooltipModule } from 'primeng/tooltip';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { MessageModule } from 'primeng/message';
+import { MessagesModule } from 'primeng/messages';
+import { BadgeModule } from 'primeng/badge';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { TabViewModule } from 'primeng/tabview';
+import { AccordionModule } from 'primeng/accordion';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 @NgModule({
     imports: [
@@ -47,7 +57,16 @@ import { ChartModule } from 'primeng/chart';
         MenubarModule,
         DividerModule,
         MenuModule,
-        ChartModule
+        ChartModule,
+        TooltipModule,
+        ConfirmDialogModule,
+        ProgressSpinnerModule,
+        MessageModule,
+        MessagesModule,
+        BadgeModule,
+        AutoCompleteModule,
+        TabViewModule,
+        AccordionModule
     ],
     exports: [
         CommonModule,
@@ -71,7 +90,17 @@ import { ChartModule } from 'primeng/chart';
         MenubarModule,
         DividerModule,
         MenuModule,
-        ChartModule
-    ]
+        ChartModule,
+        TooltipModule,
+        ConfirmDialogModule,
+        ProgressSpinnerModule,
+        MessageModule,
+        MessagesModule,
+        BadgeModule,
+        AutoCompleteModule,
+        TabViewModule,
+        AccordionModule
+    ],
+    providers: [ConfirmationService, MessageService]
 })
 export class SharedUiModule { }

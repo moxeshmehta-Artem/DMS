@@ -4,35 +4,24 @@ import { AppointmentService } from '../../core/services/appointment.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { Appointment, AppointmentStatus } from '../../core/models/appointment.model';
+import { StatusSeverityPipe } from '../../shared/pipes/status-severity.pipe';
 
-// PrimeNG Imports
-import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
-import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { DialogModule } from 'primeng/dialog';
-import { InputTextareaModule } from 'primeng/inputtextarea';
 import { FormsModule } from '@angular/forms';
 import { PatientService } from '../../core/services/patient.service';
 import { VitalsService } from '../../core/services/vitals.service';
 import { User } from '../../core/models/user.model';
+import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 
 @Component({
   selector: 'app-appointments',
   standalone: true,
   imports: [
     CommonModule,
-    CardModule,
-    TableModule,
-    ButtonModule,
-    TagModule,
-    ToastModule,
-    DialogModule,
-    InputTextareaModule,
+    SharedUiModule,
     FormsModule,
-    DatePipe
+    DatePipe,
+    StatusSeverityPipe
   ],
   providers: [MessageService],
   templateUrl: './appointment.component.html'
@@ -106,19 +95,19 @@ export class AppointmentComponent implements OnInit {
 
   // PATIENT DETAILS
   viewPatient(patientId: number) {
-    this.userService.getUsers().subscribe(users => {
+    this.userService.getUsers().subscribe((users: User[]) => {
       const user = users.find(u => u.id === patientId);
       if (user) {
         this.selectedPatient = { ...user };
 
         // Fetch latest vitals from backend
         this.vitalsService.getLatestVitals(patientId).subscribe({
-          next: (vitals) => {
+          next: (vitals: any) => {
             if (this.selectedPatient && this.selectedPatient.id === patientId) {
               this.selectedPatient.vitals = vitals;
             }
           },
-          error: (err) => {
+          error: (err: any) => {
             console.warn('Could not fetch latest vitals', err);
           }
         });
@@ -130,7 +119,7 @@ export class AppointmentComponent implements OnInit {
 
   updateStatus(appt: Appointment, status: AppointmentStatus) {
     this.appointmentService.updateStatus(appt.id, status).subscribe({
-      next: (updated) => {
+      next: (updated: Appointment) => {
         appt.status = updated.status;
         this.messageService.add({
           severity: status === 'CONFIRMED' ? 'success' : 'warn',
@@ -138,21 +127,10 @@ export class AppointmentComponent implements OnInit {
           detail: `Appointment has been ${status.toLowerCase()}.`
         });
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Update status failed', err);
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update appointment status' });
       }
     });
-  }
-
-  getSeverity(status: string): 'success' | 'warning' | 'danger' | 'info' | undefined {
-    switch (status) {
-      case 'CONFIRMED': return 'success';
-      case 'PENDING': return 'warning';
-      case 'REJECTED': return 'danger';
-      case 'COMPLETED': return 'info';
-      case 'CANCELLED': return 'danger';
-      default: return undefined;
-    }
   }
 }

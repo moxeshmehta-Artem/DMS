@@ -22,7 +22,7 @@
                     <td>{{ appt.timeSlot }}</td>
                     <td>{{ appt.description }}</td>
                     <td>
-                        <p-tag [value]="appt.status" [severity]="getSeverity(appt.status)"></p-tag>
+                        <p-tag [value]="appt.status" [severity]="appt.status | statusSeverity"></p-tag>
                     </td>
                     <td>
                         <div class="flex gap-2" *ngIf="appt.status === 'PENDING'">

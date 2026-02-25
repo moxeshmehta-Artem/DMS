@@ -17,13 +17,61 @@ import jsPDF from 'jspdf';
 })
 export class DietPlanViewComponent implements OnInit {
     downloadPlan() {
-        // write logic of pdf generation
-        const pdf = new jsPDF();
-        pdf.text(this.dietPlan.breakfast, 10, 10);
-        pdf.text(this.dietPlan.lunch, 10, 20);
-        pdf.text(this.dietPlan.dinner, 10, 30);
-        pdf.text(this.dietPlan.snacks, 10, 40);
-        pdf.save('diet-plan.pdf');
+        if (!this.dietPlan) return;
+
+        const doc = new jsPDF();
+        const patient = this.authService.currentUser();
+        const date = new Date().toLocaleDateString();
+
+        // Header
+        doc.setFontSize(22);
+        doc.setTextColor(41, 128, 185); // Blue
+        doc.text('Diet Management System', 105, 20, { align: 'center' });
+
+        doc.setFontSize(16);
+        doc.setTextColor(100);
+        doc.text('Personalized Diet Plan', 105, 30, { align: 'center' });
+
+        // horizontal line
+        doc.setDrawColor(200);
+        doc.line(20, 35, 190, 35);
+
+        // Patient Info
+        doc.setFontSize(12);
+        doc.setTextColor(50);
+        doc.text(`Patient: ${patient?.firstName} ${patient?.lastName}`, 20, 45);
+        doc.text(`Date: ${date}`, 190, 45, { align: 'right' });
+
+        // Meal Sections
+        let yPos = 60;
+        const meals = [
+            { title: 'BREAKFAST', content: this.dietPlan.breakfast, color: [52, 152, 219] },
+            { title: 'LUNCH', content: this.dietPlan.lunch, color: [230, 126, 34] },
+            { title: 'DINNER', content: this.dietPlan.dinner, color: [155, 89, 182] },
+            { title: 'SNACKS', content: this.dietPlan.snacks || 'No snacks assigned', color: [46, 204, 113] }
+        ];
+
+        meals.forEach(meal => {
+            // Meal Header
+            doc.setFontSize(14);
+            doc.setTextColor(meal.color[0], meal.color[1], meal.color[2]);
+            doc.text(meal.title, 20, yPos);
+
+            // Content
+            doc.setFontSize(11);
+            doc.setTextColor(60);
+            const lines = doc.splitTextToSize(meal.content || 'None', 160);
+            doc.text(lines, 25, yPos + 7);
+
+            yPos += (lines.length * 7) + 15;
+        });
+
+        // Footer
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text('Stay healthy and follow the plan!', 105, 285, { align: 'center' });
+
+        doc.save(`DietPlan_${patient?.lastName || 'Patient'}.pdf`);
     }
     dietPlan: any = null;
     completionStatus = { breakfast: false, lunch: false, dinner: false, snacks: false };
@@ -35,14 +83,21 @@ export class DietPlanViewComponent implements OnInit {
     ngOnInit() {
         const currentUser = this.authService.currentUser();
         if (currentUser) {
-            this.dietPlan = this.patientService.getDietPlan(currentUser.id);
+            this.patientService.getDietPlan(currentUser.id).subscribe({
+                next: (plan: any) => {
+                    this.dietPlan = plan;
 
-            // Load saved progress
-            const savedStatus = this.patientService.getDietProgress(currentUser.id);
-            if (savedStatus) {
-                this.completionStatus = savedStatus;
-                this.calculateProgress();
-            }
+                    // Load saved progress
+                    const savedStatus = this.patientService.getDietProgress(currentUser.id);
+                    if (savedStatus) {
+                        this.completionStatus = savedStatus;
+                        this.calculateProgress();
+                    }
+                },
+                error: (err: any) => {
+                    console.error('Failed to load diet plan', err);
+                }
+            });
         }
     }
 
