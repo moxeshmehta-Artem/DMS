@@ -1,7 +1,7 @@
 <div class="mt-4">
     <p-toast></p-toast>
     <p-card header="All Dietitians" subheader="Start managing your team">
-        <p-table [value]="dietitians" [tableStyle]="{ 'min-width': '50rem' }">
+        <p-table [value]="dietitians" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true" [rows]="5">
             <ng-template pTemplate="header">
                 <tr>
                     <th style="width: 50px"></th>
