@@ -32,35 +32,4 @@ export class PatientService {
     getVitalsHistory(patientId: number): Observable<any[]> {
         return this.http.get<any[]>(`${this.API_URL}/${patientId}/vitals`);
     }
-
-    // Progress Tracking (Keep for now, but these could also be moved to backend)
-    private dietProgress = new Map<number, any>();
-
-    constructor() {
-        this.loadProgress();
-    }
-
-    private loadProgress() {
-        if (typeof localStorage !== 'undefined') {
-            const storedProgress = localStorage.getItem('dms_diet_progress');
-            if (storedProgress) {
-                this.dietProgress = new Map(JSON.parse(storedProgress));
-            }
-        }
-    }
-
-    private saveProgress() {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('dms_diet_progress', JSON.stringify(Array.from(this.dietProgress.entries())));
-        }
-    }
-
-    saveDietProgress(patientId: number, status: any): void {
-        this.dietProgress.set(patientId, status);
-        this.saveProgress();
-    }
-
-    getDietProgress(patientId: number): any {
-        return this.dietProgress.get(patientId) || { breakfast: false, lunch: false, dinner: false, snacks: false };
-    }
 }
