@@ -26,44 +26,7 @@ import { TooltipModule } from 'primeng/tooltip';
         TooltipModule
     ],
     providers: [MessageService],
-    template: `
-    <div class="mt-4">
-        <p-toast></p-toast>
-        <p-card header="All Dietitians" subheader="Start managing your team">
-             <p-table [value]="dietitians" [tableStyle]="{ 'min-width': '50rem' }">
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th style="width: 50px"></th>
-                        <th>Name</th>
-                        <th>Speciality</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-doc>
-                    <tr>
-                        <td>
-                             <p-avatar icon="pi pi-user" shape="circle" styleClass="bg-blue-100 text-blue-500"></p-avatar>
-                        </td>
-                        <td class="font-bold">{{ doc.name }}</td>
-                        <td>{{ doc.speciality }}</td>
-                        <td>
-                            <p-tag severity="success" value="Active"></p-tag>
-                        </td>
-                        <td>
-                            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" pTooltip="Remove" (onClick)="deleteDietitian(doc)"></p-button>
-                        </td>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="emptymessage">
-                    <tr>
-                        <td colspan="5" class="text-center p-4">No dietitians found.</td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </p-card>
-    </div>
-  `
+    templateUrl: './admin-dashboard.component.html'
 })
 export class AdminDashboardComponent implements OnInit {
     dietitians: any[] = [];

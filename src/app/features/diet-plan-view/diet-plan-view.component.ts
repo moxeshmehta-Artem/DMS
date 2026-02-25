@@ -13,65 +13,7 @@ import jsPDF from 'jspdf';
     selector: 'app-diet-plan-view',
     standalone: true,
     imports: [CommonModule, CardModule, Button, FormsModule, CheckboxModule, ProgressBarModule],
-    template: `
-    <div class="p-4">
-        <p-card header="My Assigned Diet Plan" subheader="Follow these instructions from your Dietitian">
-            
-            <div class="mb-4" *ngIf="dietPlan">
-                <label class="block font-bold mb-2">Daily Progress: {{ progress }}%</label>
-                <p-progressBar [value]="progress"></p-progressBar>
-            </div>
-
-            <div *ngIf="dietPlan; else noPlan" class="grid">
-                <div class="col-12 md:col-6">
-                    <div class="surface-card p-3 shadow-2 border-round h-full border-left-3 border-blue-500 relative">
-                        <div class="flex align-items-center justify-content-between mb-2">
-                            <div class="text-xl font-bold text-blue-500">Breakfast</div>
-                            <p-checkbox [(ngModel)]="completionStatus.breakfast" [binary]="true" (onChange)="onCheck()"></p-checkbox>
-                        </div>
-                        <p class="line-height-3 m-0">{{ dietPlan.breakfast }}</p>
-                    </div>
-                </div>
-                <div class="col-12 md:col-6">
-                    <div class="surface-card p-3 shadow-2 border-round h-full border-left-3 border-orange-500 relative">
-                         <div class="flex align-items-center justify-content-between mb-2">
-                            <div class="text-xl font-bold text-orange-500">Lunch</div>
-                            <p-checkbox [(ngModel)]="completionStatus.lunch" [binary]="true" (onChange)="onCheck()"></p-checkbox>
-                        </div>
-                        <p class="line-height-3 m-0">{{ dietPlan.lunch }}</p>
-                    </div>
-                </div>
-                <div class="col-12 md:col-6">
-                    <div class="surface-card p-3 shadow-2 border-round h-full border-left-3 border-purple-500 relative">
-                        <div class="flex align-items-center justify-content-between mb-2">
-                            <div class="text-xl font-bold text-purple-500">Dinner</div>
-                            <p-checkbox [(ngModel)]="completionStatus.dinner" [binary]="true" (onChange)="onCheck()"></p-checkbox>
-                        </div>
-                        <p class="line-height-3 m-0">{{ dietPlan.dinner }}</p>
-                    </div>
-                </div>
-                <div class="col-12 md:col-6">
-                    <div class="surface-card p-3 shadow-2 border-round h-full border-left-3 border-green-500 relative">
-                        <div class="flex align-items-center justify-content-between mb-2">
-                            <div class="text-xl font-bold text-green-500">Snacks</div>
-                            <p-checkbox [(ngModel)]="completionStatus.snacks" [binary]="true" (onChange)="onCheck()"></p-checkbox>
-                        </div>
-                        <p class="line-height-3 m-0">{{ dietPlan.snacks }}</p>
-                    </div>
-                </div>
-                <div class="col-12 md:col-6">
-                    <p-button label="Download Plan" icon="pi pi-download" (onClick)="downloadPlan()"></p-button>
-                </div>
-            </div>
-            <ng-template #noPlan>
-                <div class="text-center p-5 surface-ground border-round">
-                    <i class="pi pi-inbox text-4xl text-500 mb-3"></i>
-                    <p class="text-600 m-0">No specific diet plan has been assigned yet.</p>
-                </div>
-            </ng-template>
-        </p-card>
-    </div>
-    `
+    templateUrl: './diet-plan-view.component.html'
 })
 export class DietPlanViewComponent implements OnInit {
     downloadPlan() {
