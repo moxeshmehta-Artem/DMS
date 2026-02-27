@@ -1,16 +1,17 @@
 <div class="surface-card p-4 shadow-2 border-round">
     <div class="flex align-items-center justify-content-between mb-4">
-        <div class="text-2xl font-bold text-900">Pending Appointment Requests</div>
+        <div class="text-2xl font-bold text-900">Active Appointments</div>
         <p-button icon="pi pi-refresh" [rounded]="true" [text]="true" (onClick)="loadPendingAppointments()"
             [loading]="isLoading"></p-button>
     </div>
 
-    <p-table [value]="pendingAppointments" [responsiveLayout]="'stack'" styleClass="p-datatable-sm">
+    <p-table [value]="activeAppointments" [responsiveLayout]="'stack'" styleClass="p-datatable-sm" [paginator]="true"
+        [rows]="5">
         <ng-template pTemplate="header">
             <tr>
                 <th>Patient</th>
                 <th>Date</th>
-                <th>Time</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </ng-template>
@@ -25,16 +26,21 @@
                     {{ appt.appointmentDate | date:'mediumDate' }}
                 </td>
                 <td>
-                    <span class="p-column-title font-bold">Time</span>
-                    {{ appt.timeSlot }}
+                    <span class="p-column-title font-bold">Status</span>
+                    <p-tag [value]="appt.status" [severity]="appt.status | statusSeverity"></p-tag>
                 </td>
                 <td>
                     <span class="p-column-title font-bold">Actions</span>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2" *ngIf="appt.status === 'PENDING'">
                         <p-button icon="pi pi-check" severity="success" [rounded]="true" [text]="true" pTooltip="Accept"
                             (onClick)="updateStatus(appt, 'CONFIRMED')"></p-button>
                         <p-button icon="pi pi-times" severity="danger" [rounded]="true" [text]="true" pTooltip="Reject"
                             (onClick)="updateStatus(appt, 'REJECTED')"></p-button>
+                    </div>
+                    <div class="flex gap-2" *ngIf="appt.status === 'CONFIRMED'">
+                        <p-button label="Complete" icon="pi pi-check-circle" severity="help" [rounded]="true"
+                            [text]="true" pTooltip="Mark as Completed"
+                            (onClick)="updateStatus(appt, 'COMPLETED')"></p-button>
                     </div>
                 </td>
             </tr>
@@ -42,8 +48,8 @@
         <ng-template pTemplate="emptymessage">
             <tr>
                 <td colspan="4" class="text-center p-4 text-600">
-                    <i class="pi pi-check-circle text-4xl mb-3 block text-primary"></i>
-                    No pending appointment requests.
+                    <i class="pi pi-calendar-check text-4xl mb-3 block text-primary"></i>
+                    No active appointments.
                 </td>
             </tr>
         </ng-template>

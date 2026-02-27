@@ -1,7 +1,8 @@
 <div class="p-4">
     <p-toast></p-toast>
     <p-card header="Appointment Requests" subheader="Manage your upcoming schedule">
-        <p-table [value]="appointments" [tableStyle]="{ 'min-width': '50rem' }">
+        <p-table [value]="appointments" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true" [rows]="5"
+            [showPageLinks]="true">
             <ng-template pTemplate="header">
                 <tr>
                     <th>Patient Name</th>

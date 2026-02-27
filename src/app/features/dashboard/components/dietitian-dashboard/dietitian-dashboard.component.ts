@@ -4,12 +4,13 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { SharedUiModule } from '../../../../shared/modules/shared-ui.module';
 
 import { MessageService } from 'primeng/api';
-import { Appointment } from '../../../../core/models/appointment.model';
+import { Appointment, AppointmentStatus } from '../../../../core/models/appointment.model';
+import { StatusSeverityPipe } from '../../../../shared/pipes/status-severity.pipe';
 
 @Component({
     selector: 'app-dietitian-dashboard',
     standalone: true,
-    imports: [SharedUiModule],
+    imports: [SharedUiModule, StatusSeverityPipe],
     providers: [MessageService],
     templateUrl: './dietitian-dashboard.component.html',
     styleUrls: ['./dietitian-dashboard.component.scss']
@@ -19,7 +20,7 @@ export class DietitianDashboardComponent implements OnInit {
     private authService = inject(AuthService);
     private messageService = inject(MessageService);
 
-    pendingAppointments: Appointment[] = [];
+    activeAppointments: Appointment[] = [];
     isLoading = false;
 
     ngOnInit() {
@@ -32,19 +33,19 @@ export class DietitianDashboardComponent implements OnInit {
             this.isLoading = true;
             this.appointmentService.getAppointmentsForDietitian(user.id).subscribe({
                 next: (data) => {
-                    this.pendingAppointments = data.filter(a => a.status === 'PENDING');
+                    this.activeAppointments = data.filter(a => a.status === 'PENDING' || a.status === 'CONFIRMED');
                     this.isLoading = false;
                 },
                 error: (err) => {
-                    console.error('Failed to load pending appointments', err);
-                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load pending appointments' });
+                    console.error('Failed to load active appointments', err);
+                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load active appointments' });
                     this.isLoading = false;
                 }
             });
         }
     }
 
-    updateStatus(appt: Appointment, status: 'CONFIRMED' | 'REJECTED') {
+    updateStatus(appt: Appointment, status: AppointmentStatus) {
         this.appointmentService.updateStatus(appt.id, status).subscribe({
             next: (updated) => {
                 this.messageService.add({
@@ -52,8 +53,14 @@ export class DietitianDashboardComponent implements OnInit {
                     summary: 'Updated',
                     detail: `Appointment ${status.toLowerCase()} successfully`
                 });
-                // Remove from pending list
-                this.pendingAppointments = this.pendingAppointments.filter(a => a.id !== appt.id);
+
+                if (status === 'COMPLETED' || status === 'REJECTED' || status === 'CANCELLED') {
+                    // Remove from dashboard list if it's no longer active
+                    this.activeAppointments = this.activeAppointments.filter(a => a.id !== appt.id);
+                } else {
+                    // Update in place for status transitions like PENDING -> CONFIRMED
+                    appt.status = updated.status;
+                }
             },
             error: (err) => {
                 console.error('Failed to update status', err);
