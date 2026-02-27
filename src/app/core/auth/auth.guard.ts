@@ -18,7 +18,6 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: R
         // Role not authorized, redirect to dashboard or home
         return router.createUrlTree(['/dashboard']);
     }
-
     return true;
 };
 

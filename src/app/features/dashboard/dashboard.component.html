@@ -28,8 +28,12 @@
         <!-- ADMIN DASHBOARD -->
         <app-admin-dashboard *ngIf="isAdmin"></app-admin-dashboard>
 
+        <!-- DIETITIAN DASHBOARD -->
+        <app-dietitian-dashboard *ngIf="isDietitian"></app-dietitian-dashboard>
+
         <!-- NO ROLE / GENERIC VIEW -->
-        <div class="surface-card p-4 shadow-2 border-round mt-4" *ngIf="!isFrontdesk && !isPatient && !isAdmin">
+        <div class="surface-card p-4 shadow-2 border-round mt-4"
+            *ngIf="!isFrontdesk && !isPatient && !isAdmin && !isDietitian">
             <div class="text-2xl font-medium text-900 mb-3">Welcome to your Dashboard</div>
             <p class="text-600 line-height-3 mb-4">
                 You are logged in as <strong>{{ currentUser()?.username }}</strong>.

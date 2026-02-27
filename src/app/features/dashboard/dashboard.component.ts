@@ -8,6 +8,7 @@ import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 import { FrontDeskDashboardComponent } from './components/front-desk-dashboard/front-desk-dashboard.component';
 import { PatientDashboardComponent } from './components/patient-dashboard/patient-dashboard.component';
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
+import { DietitianDashboardComponent } from './components/dietitian-dashboard/dietitian-dashboard.component';
 
 @Component({
     selector: 'app-dashboard',
@@ -17,7 +18,8 @@ import { AdminDashboardComponent } from './components/admin-dashboard/admin-dash
         SharedUiModule,
         FrontDeskDashboardComponent,
         PatientDashboardComponent,
-        AdminDashboardComponent
+        AdminDashboardComponent,
+        DietitianDashboardComponent
     ],
     templateUrl: './dashboard.component.html'
 })
@@ -27,6 +29,7 @@ export class DashboardComponent implements OnInit {
     isFrontdesk = false;
     isPatient = false;
     isAdmin = false;
+    isDietitian = false;
 
     constructor(private authService: AuthService, private router: Router) { }
 
@@ -41,6 +44,7 @@ export class DashboardComponent implements OnInit {
             this.isFrontdesk = role === Role.Frontdesk;
             this.isPatient = role === Role.Patient;
             this.isAdmin = role === Role.Admin;
+            this.isDietitian = role === Role.Dietitian;
         }
     }
 

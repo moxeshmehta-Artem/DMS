@@ -1,31 +1,14 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { MessageService } from 'primeng/api';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { passwordMatchValidator } from '../../../shared/validators/match-password.validator';
-
-// PrimeNG
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { ToastModule } from 'primeng/toast';
+import { SharedUiModule } from '../../../shared/modules/shared-ui.module';
 
 @Component({
     selector: 'app-add-dietitian',
     standalone: true,
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        CardModule,
-        ButtonModule,
-        InputTextModule,
-        PasswordModule,
-        InputNumberModule,
-        ToastModule
-    ],
+    imports: [SharedUiModule],
     providers: [MessageService],
     templateUrl: './add-dietitian.component.html',
     styleUrls: ['./add-dietitian.component.scss']

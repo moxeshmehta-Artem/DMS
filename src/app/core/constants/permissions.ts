@@ -3,7 +3,7 @@ import { Role } from '../models/role.enum';
 export const PERMISSIONS = {
     [Role.Frontdesk]: {
         canRegisterPatient: true,
-        canLogin: true // Only meaningful after registration, but Frontdesk user itself can login logic
+        canLogin: true
     },
     [Role.Admin]: {
         canManageDietitians: true,

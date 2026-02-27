@@ -1,25 +1,22 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { Appointment, AppointmentStatus } from '../../core/models/appointment.model';
 import { StatusSeverityPipe } from '../../shared/pipes/status-severity.pipe';
 
-import { MessageService } from 'primeng/api';
-import { FormsModule } from '@angular/forms';
 import { PatientService } from '../../core/services/patient.service';
 import { VitalsService } from '../../core/services/vitals.service';
 import { User } from '../../core/models/user.model';
 import { SharedUiModule } from '../../shared/modules/shared-ui.module';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-appointments',
   standalone: true,
   imports: [
-    CommonModule,
     SharedUiModule,
-    FormsModule,
     DatePipe,
     StatusSeverityPipe
   ],

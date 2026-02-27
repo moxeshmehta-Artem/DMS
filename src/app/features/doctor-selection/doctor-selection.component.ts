@@ -1,34 +1,15 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { AuthService } from '../../core/auth/auth.service';
-
-// PrimeNG Imports
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { CalendarModule } from 'primeng/calendar';
-import { DropdownModule } from 'primeng/dropdown';
-import { InputTextareaModule } from 'primeng/inputtextarea';
-import { ToastModule } from 'primeng/toast';
-import { TableModule } from 'primeng/table';
+import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-doctor-selection',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    CardModule,
-    ButtonModule,
-    DialogModule,
-    CalendarModule,
-    DropdownModule,
-    InputTextareaModule,
-    ToastModule,
-    TableModule,
+    SharedUiModule,
     DatePipe
   ],
   providers: [MessageService],
@@ -45,9 +26,7 @@ export class DoctorSelectionComponent implements OnInit {
   description: string = '';
 
   minDate = new Date();
-  allTimeSlots = ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'];
   availableTimeSlots: string[] = [];
-  bookedAppointments: any[] = [];
   isLoading = false;
 
   private appointmentService = inject(AppointmentService);
@@ -71,23 +50,12 @@ export class DoctorSelectionComponent implements OnInit {
     this.bookingDate = undefined;
     this.bookingTime = undefined;
     this.description = '';
-    this.bookedAppointments = [];
     this.isLoading = false;
-
-    // this.loadDoctorSchedule(doctor.id); // Optimized: No longer fetching all history
     this.availableTimeSlots = [];
-
     this.displayBookingDialog = true;
   }
 
-  loadDoctorSchedule(doctorId: number) {
-    this.appointmentService.getAppointmentsForDietitian(doctorId).subscribe({
-      next: (allAppts) => {
-        this.bookedAppointments = allAppts.filter(a => a.status === 'CONFIRMED' || a.status === 'PENDING');
-        this.updateAvailableSlots();
-      }
-    });
-  }
+
 
   updateAvailableSlots() {
     if (!this.bookingDate || !this.selectedDietitian) return;

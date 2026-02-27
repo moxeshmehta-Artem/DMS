@@ -6,7 +6,7 @@ import { StatusSeverityPipe } from '../../../../shared/pipes/status-severity.pip
 @Component({
     selector: 'app-registered-patients',
     standalone: true,
-    imports: [CommonModule, SharedUiModule, StatusSeverityPipe],
+    imports: [SharedUiModule, StatusSeverityPipe],
     templateUrl: './registered-patients.component.html',
     styleUrls: ['./registered-patients.component.scss']
 })

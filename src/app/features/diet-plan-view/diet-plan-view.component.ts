@@ -1,15 +1,13 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CardModule } from 'primeng/card';
 import { PatientService } from '../../core/services/patient.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { ButtonDirective, Button } from "primeng/button";
+import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 import jsPDF from 'jspdf';
 
 @Component({
     selector: 'app-diet-plan-view',
     standalone: true,
-    imports: [CommonModule, CardModule, Button],
+    imports: [SharedUiModule],
     templateUrl: './diet-plan-view.component.html'
 })
 export class DietPlanViewComponent implements OnInit {

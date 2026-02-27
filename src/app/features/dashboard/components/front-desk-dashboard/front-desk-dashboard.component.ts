@@ -1,5 +1,4 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SharedUiModule } from '../../../../shared/modules/shared-ui.module';
 import { RegisteredPatientsComponent } from '../registered-patients/registered-patients.component';
@@ -9,12 +8,12 @@ import { UserService } from '../../../../core/services/user.service';
 import { VitalsService } from '../../../../core/services/vitals.service';
 import { prepareChartData } from '../../utils/chart-utils';
 import { MessageService } from 'primeng/api';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 
 @Component({
     selector: 'app-front-desk-dashboard',
     standalone: true,
-    imports: [CommonModule, SharedUiModule, RegisteredPatientsComponent, ReactiveFormsModule],
+    imports: [SharedUiModule, RegisteredPatientsComponent],
     providers: [MessageService],
     templateUrl: './front-desk-dashboard.component.html',
     styleUrls: ['./front-desk-dashboard.component.scss']

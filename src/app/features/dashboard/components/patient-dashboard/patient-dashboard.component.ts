@@ -1,16 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { SharedUiModule } from '../../../../shared/modules/shared-ui.module';
 import { StatusSeverityPipe } from '../../../../shared/pipes/status-severity.pipe';
 import { AppointmentService } from '../../../../core/services/appointment.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { Appointment } from '../../../../core/models/appointment.model';
-import { CardModule } from 'primeng/card';
 
 @Component({
     selector: 'app-patient-dashboard',
     standalone: true,
-    imports: [CommonModule, SharedUiModule, StatusSeverityPipe, CardModule],
+    imports: [SharedUiModule, StatusSeverityPipe],
     templateUrl: './patient-dashboard.component.html'
 })
 export class PatientDashboardComponent implements OnInit {

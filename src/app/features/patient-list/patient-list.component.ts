@@ -12,7 +12,6 @@ import { forkJoin } from 'rxjs'; // Import forkJoin
   selector: 'app-patient-list',
   standalone: true,
   imports: [
-    CommonModule,
     SharedUiModule,
     DatePipe
   ],

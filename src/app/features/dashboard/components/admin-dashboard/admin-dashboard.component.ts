@@ -1,29 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { AppointmentService } from '../../../../core/services/appointment.service';
+import { SharedUiModule } from '../../../../shared/modules/shared-ui.module';
 import { MessageService } from 'primeng/api';
-
-// PrimeNG
-import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
-import { AvatarModule } from 'primeng/avatar';
-import { TagModule } from 'primeng/tag';
-import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
-import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
     selector: 'app-admin-dashboard',
     standalone: true,
     imports: [
-        CommonModule,
-        CardModule,
-        TableModule,
-        AvatarModule,
-        TagModule,
-        ButtonModule,
-        ToastModule,
-        TooltipModule
+        SharedUiModule
     ],
     providers: [MessageService],
     templateUrl: './admin-dashboard.component.html'
