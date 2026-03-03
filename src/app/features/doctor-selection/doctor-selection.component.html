@@ -26,7 +26,7 @@
             <div class="flex flex-column gap-2">
                 <label class="font-bold">Select Date</label>
                 <p-calendar [(ngModel)]="bookingDate" [minDate]="minDate" [showOnFocus]="false" [showIcon]="true"
-                    appendTo="body" (onSelect)="updateAvailableSlots()"></p-calendar>
+                    appendTo="body" (onSelect)="updateAvailableSlots($event)"></p-calendar>
             </div>
 
             <div class="flex flex-column gap-2">

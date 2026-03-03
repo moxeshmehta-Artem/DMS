@@ -57,7 +57,11 @@ export class DoctorSelectionComponent implements OnInit {
 
 
 
-  updateAvailableSlots() {
+  updateAvailableSlots(selectedDate?: Date) {
+    if (selectedDate) {
+      this.bookingDate = selectedDate;
+    }
+
     if (!this.bookingDate || !this.selectedDietitian) return;
 
     this.isLoading = true;
@@ -104,12 +108,8 @@ export class DoctorSelectionComponent implements OnInit {
         description: this.description || 'Consultation'
       }).subscribe({
         next: (res) => {
-          if (res.success) {
-            this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Appointment Request Sent!' });
-            this.displayBookingDialog = false;
-          } else {
-            this.messageService.add({ severity: 'info', summary: 'Unavailable', detail: res.message || 'Slot is already taken' });
-          }
+          this.messageService.add({ severity: 'success', summary: 'Confirmed', detail: 'Appointment Request Sent!' });
+          this.displayBookingDialog = false;
           this.isLoading = false;
         },
         error: (err) => {

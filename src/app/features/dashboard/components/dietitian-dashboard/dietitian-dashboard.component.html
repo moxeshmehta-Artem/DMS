@@ -37,6 +37,7 @@
                         <p-button icon="pi pi-times" severity="danger" [rounded]="true" [text]="true" pTooltip="Reject"
                             (onClick)="updateStatus(appt, 'REJECTED')"></p-button>
                     </div>
+                    
                     <div class="flex gap-2" *ngIf="appt.status === 'CONFIRMED'">
                         <p-button label="Complete" icon="pi pi-check-circle" severity="help" [rounded]="true"
                             [text]="true" pTooltip="Mark as Completed"
