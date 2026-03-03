@@ -40,8 +40,8 @@ export class FrontDeskDashboardComponent implements OnInit {
     vitalsForm: FormGroup = this.fb.group({
         height: [null, [Validators.required, Validators.min(0), Validators.max(300)]],
         weight: [null, [Validators.required, Validators.min(0), Validators.max(500)]],
-        bloodPressureSys: [null, [Validators.min(0), Validators.max(300)]],
-        bloodPressureDia: [null, [Validators.min(0), Validators.max(300)]],
+        bpSystolic: [null, [Validators.min(0), Validators.max(300)]],
+        bpDiastolic: [null, [Validators.min(0), Validators.max(300)]],
         heartRate: [null, [Validators.min(0), Validators.max(300)]],
         temperature: [null, [Validators.min(30), Validators.max(45)]]
     });

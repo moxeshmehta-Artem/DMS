@@ -5,8 +5,8 @@ import { Observable } from 'rxjs';
 export interface VitalsRequest {
     height: number;
     weight: number;
-    bloodPressureSys?: number;
-    bloodPressureDia?: number;
+    bpSystolic?: number;
+    bpDiastolic?: number;
     heartRate?: number;
     temperature?: number;
 }
@@ -38,6 +38,6 @@ export class VitalsService {
     }
 
     updateVitals(vitalsId: number, vitals: VitalsRequest): Observable<VitalsResponse> {
-        return this.http.put<VitalsResponse>(`http://localhost:8080/api/v1/patients/vitals/${vitalsId}`, vitals);
+        return this.http.put<VitalsResponse>(`${this.apiUrl}/vitals/${vitalsId}`, vitals);
     }
 }

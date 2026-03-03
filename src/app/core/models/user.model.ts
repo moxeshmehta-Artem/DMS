@@ -20,8 +20,8 @@ export interface User {
         height?: number; // cm
         weight?: number; // kg
         bmi?: number;
-        bloodPressureSys?: number;
-        bloodPressureDia?: number;
+        bpSystolic?: number;
+        bpDiastolic?: number;
         heartRate?: number;
         temperature?: number;
     };
