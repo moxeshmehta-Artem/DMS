@@ -20,6 +20,7 @@ export class AddDietitianComponent {
 
     dietitianForm: FormGroup = this.fb.group({
         name: ['', [Validators.required, Validators.pattern('^[a-zA-Z ]*$')]],
+        email: ['', [Validators.required, Validators.email]],
         username: ['', Validators.required],
         password: ['', Validators.required],
         confirmPassword: ['', Validators.required],
@@ -35,9 +36,14 @@ export class AddDietitianComponent {
     onSubmit() {
         if (this.dietitianForm.valid) {
             const val = this.dietitianForm.value;
+            const nameParts = val.name.split(' ');
+            const firstName = nameParts[0];
+            const lastName = nameParts.slice(1).join(' ');
+
             const result$ = this.appointmentService.addDietitian({
-                name: val.name,
-                speciality: 'Dietitian / Nutritionist',
+                firstName: firstName,
+                lastName: lastName,
+                email: val.email,
                 username: val.username,
                 password: val.password
             });

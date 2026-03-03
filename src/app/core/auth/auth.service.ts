@@ -80,7 +80,7 @@ export class AuthService {
     registerDietitian(user: Partial<User>, password: string): Observable<any> {
         const signupRequest: SignupRequest = {
             username: user.username!,
-            email: user.username + '@test.com',
+            email: user.email || '',
             password: password,
             role: 'ROLE_DIETITIAN',
             firstName: user.firstName,

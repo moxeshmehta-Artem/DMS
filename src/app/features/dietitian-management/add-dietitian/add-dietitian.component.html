@@ -14,6 +14,14 @@
             </div>
 
             <div class="field">
+                <label class="block font-bold mb-2">Email ID</label>
+                <input pInputText formControlName="email" placeholder="jane.doe@example.com" class="w-full" />
+                <small *ngIf="isInvalid('email')" class="text-red-500">
+                    {{ dietitianForm.get('email')?.hasError('email') ? 'Invalid email format' : 'Email is required' }}
+                </small>
+            </div>
+
+            <div class="field">
                 <label class="block font-bold mb-2">Username</label>
                 <input pInputText formControlName="username" placeholder="jdoe" class="w-full" />
                 <small *ngIf="isInvalid('username')" class="text-red-500">Username is required</small>
