@@ -11,7 +11,7 @@ import { JwtResponse, LoginRequest, SignupRequest } from '../models/auth.model';
     providedIn: 'root'
 })
 export class AuthService {
-    private readonly USER_KEY = 'auth_user';
+    private readonly TOKEN_KEY = 'auth_token';
     private readonly API_URL = 'http://localhost:8080/api/auth';
 
     private http = inject(HttpClient);
@@ -25,16 +25,33 @@ export class AuthService {
 
     private restoreSession() {
         if (typeof localStorage !== 'undefined') {
-            const stored = localStorage.getItem(this.USER_KEY);
-            if (stored) {
-                try {
-                    const user = JSON.parse(stored);
+            const token = localStorage.getItem(this.TOKEN_KEY);
+            if (token) {
+                const user = this.decodeToken(token);
+                if (user) {
                     this.currentUser.set(user);
-                } catch (e) {
-                    console.error('Error parsing stored user', e);
+                } else {
                     this.logout();
                 }
             }
+        }
+    }
+
+    private decodeToken(token: string): User | null {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return {
+                id: payload.id,
+                username: payload.sub,
+                role: this.mapBackendRoleToEnum([payload.role]),
+                token: token,
+                permissions: [],
+                firstName: payload.sub, // Fallback as names are not in token
+                lastName: ''
+            };
+        } catch (e) {
+            console.error('Error decoding token', e);
+            return null;
         }
     }
 
@@ -52,7 +69,7 @@ export class AuthService {
                     permissions: []
                 };
 
-                this.saveUser(user);
+                this.saveToken(response.token, user);
                 return user;
             })
         );
@@ -91,7 +108,7 @@ export class AuthService {
 
     logout() {
         if (typeof localStorage !== 'undefined') {
-            localStorage.removeItem(this.USER_KEY);
+            localStorage.removeItem(this.TOKEN_KEY);
         }
         this.currentUser.set(null);
         this.router.navigate(['/auth/login']);
@@ -109,10 +126,10 @@ export class AuthService {
         return this.currentUser()?.token;
     }
 
-    private saveUser(user: User) {
+    private saveToken(token: string, user: User) {
         this.currentUser.set(user);
         if (typeof localStorage !== 'undefined') {
-            localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+            localStorage.setItem(this.TOKEN_KEY, token);
         }
     }
 
