@@ -14,19 +14,6 @@ export class AppointmentService {
     private userService = inject(UserService);
     private readonly API_URL = 'http://localhost:8080/api/appointments';
 
-    getDietitians() {
-        return this.userService.getDietitians().pipe(
-            map(users => users.map(u => ({
-                id: u.id,
-                name: (u.firstName && u.lastName)
-                    ? `${u.firstName} ${u.lastName}`
-                    : (u.firstName || u.lastName || u.username),
-                speciality: 'Certified Dietitian',
-                username: u.username
-            })))
-        );
-    }
-
     getDietitianSelection() {
         return this.userService.getDietitianSelection().pipe(
             map(users => users.map(u => ({
@@ -62,16 +49,6 @@ export class AppointmentService {
                 ...(notes ? { notes: notes } : {})
             }
         });
-    }
-
-    isSlotAvailable(dietitianId: number, date: string, timeSlot: string): Observable<boolean> {
-        return this.getAppointmentsForDietitian(dietitianId).pipe(
-            map(appts => !appts.some(a =>
-                a.appointmentDate === date &&
-                a.timeSlot === timeSlot &&
-                (a.status === 'CONFIRMED' || a.status === 'PENDING')
-            ))
-        );
     }
 
     addDietitian(data: any): Observable<any> {

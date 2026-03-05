@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { AppointmentService } from '../../../../core/services/appointment.service';
+import { PatientService } from '../../../../core/services/patient.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { SharedUiModule } from '../../../../shared/modules/shared-ui.module';
 
@@ -17,15 +18,22 @@ import { StatusSeverityPipe } from '../../../../shared/pipes/status-severity.pip
 })
 export class DietitianDashboardComponent implements OnInit {
     private appointmentService = inject(AppointmentService);
+    private patientService = inject(PatientService);
     private authService = inject(AuthService);
     private messageService = inject(MessageService);
 
     activeAppointments: Appointment[] = [];
     isLoading = false;
 
+    // Diet Plan State
+    displayDietPlanDialog = false;
+    newPlan = { breakfast: '', lunch: '', dinner: '', snacks: '' };
+    selectedAppt: Appointment | null = null;
+
     ngOnInit() {
         this.loadPendingAppointments();
     }
+
 
     loadPendingAppointments() {
         const user = this.authService.currentUser();
@@ -67,5 +75,30 @@ export class DietitianDashboardComponent implements OnInit {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update status' });
             }
         });
+    }
+
+    openDietPlan(appt: Appointment) {
+        this.selectedAppt = appt;
+        this.newPlan = { breakfast: '', lunch: '', dinner: '', snacks: '' };
+        this.displayDietPlanDialog = true;
+    }
+
+    get isPlanValid(): boolean {
+        return !!(this.newPlan.breakfast && this.newPlan.lunch && this.newPlan.dinner);
+    }
+
+    saveDietPlan() {
+        if (this.selectedAppt && this.isPlanValid) {
+            this.patientService.saveDietPlan(this.selectedAppt.patientId, this.newPlan).subscribe({
+                next: () => {
+                    this.updateStatus(this.selectedAppt!, 'COMPLETED');
+                    this.displayDietPlanDialog = false;
+                    this.messageService.add({ severity: 'success', summary: 'Plan Saved', detail: 'Diet plan created and appointment completed' });
+                },
+                error: () => {
+                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to save diet plan' });
+                }
+            });
+        }
     }
 }

@@ -31,15 +31,6 @@ export class UserService {
         );
     }
 
-    getDietitians(): Observable<User[]> {
-        return this.http.get<any[]>(`${this.API_URL}/dietitians`).pipe(
-            map(users => users.map(u => ({
-                ...this.mapToUser(u),
-                role: Role.Dietitian
-            })))
-        );
-    }
-
     deleteUser(id: number): Observable<any> {
         return this.http.delete(`${this.API_URL}/${id}`);
     }

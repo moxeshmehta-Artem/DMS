@@ -37,8 +37,10 @@
                         <p-button icon="pi pi-times" severity="danger" [rounded]="true" [text]="true" pTooltip="Reject"
                             (onClick)="updateStatus(appt, 'REJECTED')"></p-button>
                     </div>
-                    
+
                     <div class="flex gap-2" *ngIf="appt.status === 'CONFIRMED'">
+                        <p-button label="Create Plan" icon="pi pi-book" severity="info" [rounded]="true" [text]="true"
+                            pTooltip="Create Diet Plan" (onClick)="openDietPlan(appt)"></p-button>
                         <p-button label="Complete" icon="pi pi-check-circle" severity="help" [rounded]="true"
                             [text]="true" pTooltip="Mark as Completed"
                             (onClick)="updateStatus(appt, 'COMPLETED')"></p-button>
@@ -55,4 +57,37 @@
             </tr>
         </ng-template>
     </p-table>
+
+    <!-- DIET PLAN DIALOG -->
+    <p-dialog [(visible)]="displayDietPlanDialog" header="Create Diet Plan" [modal]="true" [style]="{width: '600px'}">
+        <div class="flex flex-column gap-3 pt-2">
+            <label class="font-bold">Plan Details for {{ selectedAppt?.patientName }}</label>
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-6">
+                    <label class="block mb-2 font-bold">Breakfast <span class="text-red-500">*</span></label>
+                    <textarea pInputTextarea [(ngModel)]="newPlan.breakfast" rows="3"
+                        placeholder="Oats, Eggs..."></textarea>
+                </div>
+                <div class="col-12 md:col-6">
+                    <label class="block mb-2 font-bold">Lunch <span class="text-red-500">*</span></label>
+                    <textarea pInputTextarea [(ngModel)]="newPlan.lunch" rows="3"
+                        placeholder="Salad, Chicken..."></textarea>
+                </div>
+                <div class="col-12 md:col-6">
+                    <label class="block mb-2 font-bold">Dinner <span class="text-red-500">*</span></label>
+                    <textarea pInputTextarea [(ngModel)]="newPlan.dinner" rows="3"
+                        placeholder="Soup, Fish..."></textarea>
+                </div>
+                <div class="col-12 md:col-6">
+                    <label class="block mb-2 font-bold">Snacks</label>
+                    <textarea pInputTextarea [(ngModel)]="newPlan.snacks" rows="3"
+                        placeholder="Nuts, Fruits..."></textarea>
+                </div>
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <p-button label="Save & Complete" icon="pi pi-check" (onClick)="saveDietPlan()"
+                [disabled]="!isPlanValid"></p-button>
+        </ng-template>
+    </p-dialog>
 </div>
