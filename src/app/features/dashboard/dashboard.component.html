@@ -40,20 +40,15 @@
                 Below are the features you have permission to access:
             </p>
 
-            <div class="flex flex-wrap gap-2" *ngIf="userPermissions; else noPermissions">
-                <p-chip *ngIf="userPermissions.includes('register_patient')" label="" icon="pi pi-check"></p-chip>
-                <p-chip *ngIf="userPermissions.includes('add_dietitian')" label="Add Dietitian"
+            <div class="flex flex-wrap gap-2">
+                <p-chip *ngIf="permissions.canRegisterPatient" label="Register Patient" icon="pi pi-check"></p-chip>
+                <p-chip *ngIf="permissions.canAddDietitian" label="Add Dietitian" icon="pi pi-check"></p-chip>
+                <p-chip *ngIf="permissions.canViewPatients" label="View Patients" icon="pi pi-check"></p-chip>
+                <p-chip *ngIf="permissions.canScheduleAppointment" label="Schedule Appointment"
                     icon="pi pi-check"></p-chip>
-                <p-chip *ngIf="userPermissions.includes('view_patients')" label="View Patients"
-                    icon="pi pi-check"></p-chip>
-                <p-chip *ngIf="userPermissions.includes('schedule_appointment')" label="Schedule Appointment"
-                    icon="pi pi-check"></p-chip>
-                <p-chip *ngIf="userPermissions.includes('add_diet_plan')" label="Add Diet Plan"
-                    icon="pi pi-check"></p-chip>
-                <p-chip *ngIf="userPermissions.includes('view_doctors')" label="View Doctors"
-                    icon="pi pi-check"></p-chip>
-                <p-chip *ngIf="userPermissions.includes('view_diet_plan')" label="View Diet Plan"
-                    icon="pi pi-check"></p-chip>
+                <p-chip *ngIf="permissions.canAddDietPlan" label="Add Diet Plan" icon="pi pi-check"></p-chip>
+                <p-chip *ngIf="permissions.canViewDoctors" label="View Doctors" icon="pi pi-check"></p-chip>
+                <p-chip *ngIf="permissions.canViewDietPlan" label="View Diet Plan" icon="pi pi-check"></p-chip>
             </div>
             <ng-template #noPermissions>
                 <p>No special permissions assigned.</p>

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'; // Import CommonModule
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { Role } from '../../core/models/role.enum';
-import { MENU_ITEMS } from '../../core/constants/permissions';
+import { PERMISSIONS, MENU_ITEMS } from '../../core/constants/permissions';
 import { SharedUiModule } from '../../shared/modules/shared-ui.module';
 import { FrontDeskDashboardComponent } from './components/front-desk-dashboard/front-desk-dashboard.component';
 import { PatientDashboardComponent } from './components/patient-dashboard/patient-dashboard.component';
@@ -26,6 +26,7 @@ import { DietitianDashboardComponent } from './components/dietitian-dashboard/di
 export class DashboardComponent implements OnInit {
     currentUser = this.authService.currentUser;
     menuItems: any[] = [];
+    permissions: any = {}; // Add this
     isFrontdesk = false;
     isPatient = false;
     isAdmin = false;
@@ -41,6 +42,7 @@ export class DashboardComponent implements OnInit {
         const role = this.authService.getUserRole();
         if (role) {
             this.menuItems = MENU_ITEMS[role] || [];
+            this.permissions = PERMISSIONS[role] || {}; // Load capabilities from constant
             this.isFrontdesk = role === Role.Frontdesk;
             this.isPatient = role === Role.Patient;
             this.isAdmin = role === Role.Admin;
